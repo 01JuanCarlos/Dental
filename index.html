@@ -1,206 +1,220 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recetario Horizontal - Dr. Pedro Fernández</title>
+    <title>Recetario Alta Gracia - Automatizado</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:ital,wght@0,400;1,300&display=swap');
-        
-        body { font-family: 'Montserrat', sans-serif; }
-        
-        /* Contenedor de hoja horizontal (Relación de aspecto A4 Horizontal) */
-        .sheet-horizontal {
-            width: 100%;
-            aspect-ratio: 1.414 / 1; 
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Montserrat:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #d1d5db;
+            padding: 40px;
+        }
+
+        .font-alta {
+            font-family: 'Cinzel', serif;
+        }
+
+        .page-landscape {
+            width: 1122px;
+            height: 794px;
             background: white;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            margin: auto;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .header-container {
+            position: relative;
+            height: 180px;
+            width: 90%;
+            left: 112px;
+            background-color: #243e36 !important;
+            mask-image: radial-gradient(circle at 0px 90px, transparent 110px, black 111px);
+            -webkit-mask-image: radial-gradient(circle at 0px 90px, transparent 110px, black 111px);
+        }
+
+        .logo-circle {
+            position: absolute;
+            left: 3px;
+            top: 25px;
+            height: 130px;
+            background: white;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .divider {
+            position: absolute;
+            left: 50%;
+            top: 96px;
+            bottom: 80px;
+            width: 2px;
+            background-color: #c2a37d;
+            opacity: 0.3;
+        }
+
+        .footer-alta {
+            background-color: #243e36 !important;
+            height: 55px;
+            width: 100%;
+            position: absolute;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-4">
 
-    <div class="max-w-[1400px] mx-auto grid grid-cols-1 xl:grid-cols-3 gap-6">
-        
-        <div class="xl:col-span-1 bg-white p-6 rounded-xl shadow-md border-t-4 border-cyan-600">
-            <h2 class="text-xl font-bold mb-6 text-gray-800 flex items-center gap-2">
-                <span>📝</span> Datos de la Receta
-            </h2>
-            
+<body>
+    <div class="max-w-[1500px] mx-auto grid grid-cols-1 lg:grid-cols-4 gap-10">
+
+        <div id="panelControl"
+            class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-xl border-t-8 border-[#243e36] h-fit">
+            <h2 class="text-xl font-bold mb-4 text-[#243e36]">Panel de Control</h2>
             <div class="space-y-4">
-                <input type="text" id="inNombre" placeholder="Nombre del Paciente" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-cyan-500 outline-none transition-all">
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="text" id="inEdad" placeholder="Edad" class="p-3 border rounded-lg outline-none">
-                    <input type="date" id="inFecha" class="p-3 border rounded-lg outline-none text-sm">
+                <input type="text" id="inPaciente" placeholder="Nombre del Paciente"
+                    class="w-full p-2 border rounded outline-none">
+
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="inEdad" placeholder="Edad" class="p-2 border rounded">
+                    <input type="text" id="inFecha" class="p-2 border rounded bg-gray-100 text-gray-500" readonly>
                 </div>
 
-                <select id="inProcedimiento" class="w-full p-3 border rounded-lg bg-gray-50 outline-none cursor-pointer">
-                    <option value="">-- Seleccionar Procedimiento --</option>
+                <select id="selProc" class="w-full p-2 border rounded bg-gray-50 font-bold text-gray-700">
+                    <option value="">Seleccionar Procedimiento...</option>
                     <option value="extraccion">Extracción Dental</option>
-                    <option value="endodoncia">Endodoncia</option>
-                    <option value="limpieza">Limpieza Profunda</option>
                 </select>
 
-                <textarea id="inIndicaciones" rows="8" placeholder="Escriba las indicaciones aquí..." class="w-full p-3 border rounded-lg outline-none italic font-light"></textarea>
+                <textarea id="inPres" rows="4" placeholder="Prescripción..."
+                    class="w-full p-2 border rounded text-sm italic"></textarea>
+                <textarea id="inInd" rows="4" placeholder="Indicaciones..."
+                    class="w-full p-2 border rounded text-[10px]"></textarea>
 
-                <button onclick="generarPDF()" class="w-full bg-slate-800 hover:bg-black text-white font-bold py-4 rounded-lg shadow-lg flex justify-center items-center gap-2 transition-all">
-                    💾 DESCARGAR RECETA (PDF)
+                <button onclick="descargarPDF()"
+                    class="w-full bg-[#243e36] text-white py-4 rounded-xl font-bold hover:bg-black transition-all">
+                    DESCARGAR PDF
                 </button>
             </div>
         </div>
 
-        <div class="xl:col-span-2">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Vista Previa </p>
-            
-            <div id="previewArea" class="sheet-horizontal relative flex flex-col overflow-hidden text-[11px]">
-                
-                <div class="p-10 flex justify-between items-start">
-                    <div>
-                        <h1 class="text-3xl font-bold text-gray-800 tracking-tighter">DR.Ana Paula Garcia</h1>
-                        <p class="text-gray-500 text-lg">Médico general <span class="mx-4 text-gray-300">|</span> C.P. 132456789</p>
-                    </div>
-                    <div class="text-right text-gray-600 leading-relaxed">
-                        <p><strong>Cel.</strong> (316) 212-3456</p>
-                        <p><strong>Tel.</strong> 212-3456</p>
-                        <p><strong>Dirección:</strong> Calle Cualquiera 123, Cualquier Lugar</p>
-                        <p><strong>Correo:</strong> hola@unsitioestupendo.com.co</p>
+        <div class="lg:col-span-3">
+            <div id="receta" class="page-landscape">
+                <div class="logo-circle">
+                    <img src="denta.png" alt="Logo">
+                </div>
+
+                <div class="header-container">
+                    <div class="absolute inset-0 flex flex-col justify-center items-center text-center pl-24 pr-10">
+                        <h1 class="font-alta text-white text-3xl tracking-[0.2em] mb-1">Consultorio Odontológico</h1>
+                        <h2 class="font-alta text-[#c2a37d] text-5xl font-bold tracking-[0.1em] uppercase">Alta Gracia
+                        </h2>
+                        <div class="w-full flex justify-between px-10 mt-6 text-[13px] text-white/80 italic">
+                            <div>CD. ANA PAULA GARCIA MIRANDA <span class="ml-4 text-[#c2a37d]">COP: 58688</span></div>
+                            <div class="text-right leading-tight">CITAS: 936311361 <br> LEONCIO PRADO 960 _ HUAMACHUCO
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="px-10 grid grid-cols-4 gap-4 mt-2">
-                    <div class="col-span-2 border-b border-gray-400 pb-1">
-                        <strong>Nombre del paciente:</strong> <span id="pvNombre" class="ml-2"></span>
+                <div class="px-16 pt-12 pb-6 flex justify-between items-end text-[13px] font-bold text-gray-700">
+                    <div class="flex-grow flex border-b border-gray-400 pb-1 italic">PACIENTE: <span id="pvPaciente"
+                            class="font-normal ml-3 text-black not-italic uppercase"></span></div>
+                    <div class="w-32 flex border-b border-gray-400 pb-1 mx-6 italic">EDAD: <span id="pvEdad"
+                            class="font-normal ml-3 text-black not-italic"></span></div>
+                    <div class="w-44 flex border-b border-gray-400 pb-1 justify-end italic">FECHA: <span id="pvFecha"
+                            class="font-normal ml-3 text-black not-italic"></span></div>
+                </div>
+
+                <div class="flex-grow flex px-16 py-8 relative">
+                    <div class="divider"></div>
+
+                    <img src="Dental-ico.png"
+                        class="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-80 opacity-[0.03] pointer-events-none">
+                    <img src="Dental-ico.png"
+                        class="absolute top-1/2 left-3/4 -translate-x-1/2 -translate-y-1/2 w-80 opacity-[0.03] pointer-events-none">
+
+                    <div class="w-1/2 pr-12 z-10">
+                        <h3 class="text-center font-bold text-gray-400 tracking-[0.4em] text-xs mb-8">PRESCRIPCION</h3>
+                        <div id="pvPres"
+                            class="text-[14px] text-gray-800 whitespace-pre-line leading-relaxed italic min-h-[300px]">
+                        </div>
                     </div>
-                    <div class="border-b border-gray-400 pb-1">
-                        <strong>Edad:</strong> <span id="pvEdad" class="ml-2"></span>
-                    </div>
-                    <div class="border-b border-gray-400 pb-1">
-                        <strong>Fecha:</strong> <span id="pvFecha" class="ml-2"></span>
+                    <div class="w-1/2 pl-12 z-10">
+                        <h3 class="text-center font-bold text-gray-400 tracking-[0.4em] text-xs mb-8">INDICACIONES</h3>
+                        <div id="pvInd" class="text-[11px] text-gray-700 whitespace-pre-line leading-snug"></div>
                     </div>
                 </div>
 
-                <div class="px-10 mt-10 flex-grow">
-                    <h2 class="text-2xl font-bold mb-4">RX:</h2>
-                    <div id="pvIndicaciones" class="text-gray-700 text-sm leading-relaxed whitespace-pre-line italic">
-                        Seleccione un procedimiento o escriba las indicaciones...
-                    </div>
-                </div>
-
-                <div class="bg-[#e0f2f1] p-8 flex justify-between items-end">
-                    <div class="space-y-1">
-                        <p class="font-bold">Síguenos:</p>
-                        <p class="text-cyan-700">@unsitioestupendo</p>
-                        <p class="font-bold mt-2">Horarios</p>
-                        <p>De lunes a viernes de 10 a.m. a 5 p.m.</p>
-                    </div>
-                    
-                    <div class="text-center">
-                        <div class="w-48 border-t border-gray-500 mb-2 mx-auto"></div>
-                        <p class="font-bold text-gray-800 text-sm">Dr. Pedro Fernández</p>
-                        <p class="text-gray-600">Médico General</p>
-                        <p class="text-gray-500 text-[9px]">C.P. 132456789</p>
-                    </div>
-
-                    <div class="opacity-10">
-                        <svg width="80" height="80" viewBox="0 0 24 24"><path fill="currentColor" d="M13.5,2C13.5,2 13,2 12,2C11,2 10.5,2 10.5,2C10.5,2 10.5,3 10.5,3.5C10.5,4.33 11.17,5 12,5C12.83,5 13.5,4.33 13.5,3.5C13.5,3 13.5,2 13.5,2M14.5,7C14.5,7 13.5,7 12,7C10.5,7 9.5,7 9.5,7C8.12,7 7,8.12 7,9.5C7,10.66 7.8,11.63 8.87,11.91C8.31,12.5 8,13.21 8,14C8,15.15 8.65,16.15 9.6,16.65C9.23,17.38 9,18.17 9,19C9,21.21 10.79,23 13,23V21H11C10.45,21 10,20.55 10,20C10,19.45 10.45,19 11,19H13V17H11.5C10.67,17 10,16.33 10,15.5C10,14.67 10.67,14 11.5,14H13V12H11C9.9,12 9,11.1 9,10C9,8.9 9.9,8 11,8H13V6H11C9.34,6 8,4.66 8,3C8,1.34 9.34,0 11,0H13C14.66,0 16,1.34 16,3C16,4.66 14.66,6 13,6H15C16.1,8 17,8.9 17,10C17,11.1 16.1,12 15,12H13V14H14.5C15.33,14 16,14.67 16,15.5C16,16.33 15.33,17 14.5,17H13V19H15C15.55,19 16,19.45 16,20C16,20.55 15.55,21 15,21H13V23C15.21,23 17,21.21 17,19C17,18.17 16.77,17.38 16.4,16.65C17.35,16.15 18,15.15 18,14C18,13.21 17.69,12.5 17.13,11.91C18.2,11.63 19,10.66 19,9.5C19,8.12 17.88,7 16.5,7H14.5Z"/></svg>
-                    </div>
+                <div class="footer-alta">
+                    <p class="text-white text-[12px] tracking-[0.7em] font-light italic">¡ CUIDAMOS TU SALUD DENTAL !
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const { jsPDF } = window.jspdf;
-
-        const guias = {
-            "extraccion": "INDICACIONES DE EXTRACCIÓN:\n- Morder gasa firme por 45 minutos.\n- Dieta blanda y fría (helado, yogurt, jugos).\n- No usar pitillos ni escupir con fuerza.\n- No realizar esfuerzos físicos por 3 días.",
-            "endodoncia": "INDICACIONES DE ENDODONCIA:\n- Evitar masticar alimentos duros con el diente tratado.\n- Tomar Ibuprofeno 600mg si presenta molestia leve.\n- Es vital regresar para la restauración definitiva.",
-            "limpieza": "CUIDADOS POST-LIMPIEZA:\n- Evitar alimentos con colorantes intensos (café, vino, remolacha) por 24h.\n- En caso de sensibilidad, usar pasta dental para dientes sensibles."
+        // Cargar fecha actual al iniciar
+        window.onload = function () {
+            const hoy = new Date();
+            const fechaFormateada = hoy.toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+            document.getElementById('inFecha').value = fechaFormateada;
+            document.getElementById('pvFecha').innerText = fechaFormateada;
         };
 
-        // Sincronización en tiempo real
-        const fields = ['Nombre', 'Edad', 'Fecha', 'Indicaciones'];
-        fields.forEach(f => {
-            const input = document.getElementById(`in${f}`);
-            const preview = document.getElementById(`pv${f}`);
-            input.addEventListener('input', () => {
-                preview.innerText = input.value;
-            });
-        });
+        function descargarPDF() {
+            const elemento = document.getElementById('receta');
+            const nombrePaciente = document.getElementById('inPaciente').value || 'Paciente';
 
-        // Cambio de procedimiento
-        document.getElementById('inProcedimiento').addEventListener('change', (e) => {
-            const val = e.target.value;
-            const text = guias[val] || "";
-            document.getElementById('inIndicaciones').value = text;
-            document.getElementById('pvIndicaciones').innerText = text;
-        });
+            const opciones = {
+                margin: 0,
+                filename: `Receta_${nombrePaciente}.pdf`,
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { scale: 3, useCORS: true },
+                jsPDF: { unit: 'px', format: [1122, 794], orientation: 'landscape' }
+            };
 
-        // Generar PDF en Horizontal
-        function generarPDF() {
-            // "l" es para Landscape (Horizontal)
-            const doc = new jsPDF({
-                orientation: 'landscape',
-                unit: 'mm',
-                format: 'a4'
-            });
-
-            const width = doc.internal.pageSize.getWidth();
-            const height = doc.internal.pageSize.getHeight();
-
-            // Fondo celeste del pie de página
-            doc.setFillColor(224, 242, 241);
-            doc.rect(0, height - 40, width, 40, 'F');
-
-            // Encabezado
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(24);
-            doc.text("DR. PEDRO FERNÁNDEZ", 20, 25);
-            doc.setFontSize(12);
-            doc.setFont("helvetica", "normal");
-            doc.text("Médico general | C.P. 132456789", 20, 32);
-
-            // Contacto
-            doc.setFontSize(9);
-            doc.text("Cel. (316) 212-3456", width - 20, 20, {align: 'right'});
-            doc.text("Calle Cualquiera 123, Cualquier Lugar", width - 20, 25, {align: 'right'});
-            doc.text("hola@unsitioestupendo.com.co", width - 20, 30, {align: 'right'});
-
-            // Datos del paciente
-            doc.setFontSize(11);
-            doc.text(`Nombre del paciente: ${document.getElementById('inNombre').value}`, 20, 50);
-            doc.text(`Edad: ${document.getElementById('inEdad').value}`, 150, 50);
-            doc.text(`Fecha: ${document.getElementById('inFecha').value}`, 220, 50);
-            doc.line(20, 52, width - 20, 52);
-
-            // RX e Indicaciones
-            doc.setFontSize(18);
-            doc.setFont("helvetica", "bold");
-            doc.text("RX:", 20, 70);
-            
-            doc.setFontSize(12);
-            doc.setFont("helvetica", "italic");
-            const splitText = doc.splitTextToSize(document.getElementById('inIndicaciones').value, width - 40);
-            doc.text(splitText, 20, 80);
-
-            // Pie de página contenido
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(9);
-            doc.setTextColor(0,0,0);
-            doc.text("Síguenos: @unsitioestupendo", 20, height - 25);
-            doc.text("Horarios: Lunes a Viernes 10am - 5pm", 20, height - 15);
-
-            doc.text("________________________", width - 80, height - 20);
-            doc.setFont("helvetica", "bold");
-            doc.text("Dr. Pedro Fernández", width - 80, height - 15);
-            doc.setFont("helvetica", "normal");
-            doc.text("C.P. 132456789", width - 80, height - 10);
-
-            doc.save(`Receta_Horizontal_${document.getElementById('inNombre').value}.pdf`);
+            html2pdf().set(opciones).from(elemento).save();
         }
+
+        // Sincronización de campos
+        const campos = ['inPaciente', 'inEdad', 'inPres', 'inInd'];
+        campos.forEach(id => {
+            document.getElementById(id).addEventListener('input', (e) => {
+                document.getElementById(id.replace('in', 'pv')).innerText = e.target.value;
+            });
+        });
+        const recetasPredefinidas = {
+            "extraccion": {
+                p: "1. Amoxicilina 500mg\nTomar 1 tableta cada 8 horas por 5 días.\n\n2. Ibuprofeno 400mg\nTomar 1 tableta cada 8 horas por 3 días.",
+                i: "HAY QUE EVITAR:\n- FUMAR\n- ENJUAGAR Y ESCUPIR LAS PRIMERAS 24 HRS.\n- ACTIVIDAD FISICA POR 3 DIAS.\n- EXPOSICION AL SOL.\n- COMIDAS CALIENTES Y PICANTES.\n- ARROZ POR 3 DIAS.\n\nDIETA:\nHay que cuidar lo que comemos para evitar que ingrese algún fragmento alimenticio.\n- COMER DESPUÉS DE LAS 2 HORAS FINALIZADA LA INTERVENCIÓN.\n- HELADO.\n- VERDURAS AL VAPOR.\n- SOPA."
+            }
+        };
+
+        document.getElementById('selProc').addEventListener('change', (e) => {
+            const proc = e.target.value;
+            if (recetasPredefinidas[proc]) {
+                document.getElementById('inPres').value = recetasPredefinidas[proc].p;
+                document.getElementById('inInd').value = recetasPredefinidas[proc].i;
+                document.getElementById('pvPres').innerText = recetasPredefinidas[proc].p;
+                document.getElementById('pvInd').innerText = recetasPredefinidas[proc].i;
+            }
+        });
     </script>
 </body>
+
 </html>
