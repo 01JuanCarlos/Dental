@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Recetario Alta Gracia - Automatizado</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recetario Alta Gracia - Responsive</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -12,21 +13,29 @@
         body {
             font-family: 'Montserrat', sans-serif;
             background-color: #d1d5db;
-            padding: 40px;
         }
 
         .font-alta {
             font-family: 'Cinzel', serif;
         }
 
+        /* Contenedor para scroll en móviles */
+        .receta-wrapper {
+            overflow-x: auto;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
         .page-landscape {
             width: 1122px;
+            min-width: 1122px;
+            /* Evita que se encoja en móviles */
             height: 794px;
             background: white;
-            margin: auto;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
         }
 
         .header-container {
@@ -55,7 +64,7 @@
         .divider {
             position: absolute;
             left: 50%;
-            top: 96px;
+            top: 220px;
             bottom: 80px;
             width: 2px;
             background-color: #c2a37d;
@@ -72,147 +81,226 @@
             align-items: center;
             justify-content: center;
         }
+
+        /* Estilo para que el PDF se genere bien */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 
-<body>
-    <div class="max-w-[1500px] mx-auto grid grid-cols-1 lg:grid-cols-4 gap-10">
+<body class="p-2 md:p-10">
+    <div class="max-w-[1600px] mx-auto flex flex-col lg:flex-row gap-6">
 
         <div id="panelControl"
-            class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-xl border-t-8 border-[#243e36] h-fit">
-            <h2 class="text-xl font-bold mb-4 text-[#243e36]">Panel de Control</h2>
+            class="w-full lg:w-1/4 bg-white p-6 rounded-2xl shadow-xl border-t-8 border-[#243e36] h-fit no-print">
+            <h2 class="text-xl font-bold mb-4 text-[#243e36] flex items-center gap-2">
+                <span>🦷</span> Panel de Control
+            </h2>
             <div class="space-y-4">
-                <input type="text" id="inPaciente" placeholder="Nombre del Paciente"
-                    class="w-full p-2 border rounded outline-none">
-
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="inEdad" placeholder="Edad" class="p-2 border rounded">
-                    <input type="text" id="inFecha" class="p-2 border rounded bg-gray-100 text-gray-500" readonly>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase">Nombre del Paciente</label>
+                    <input type="text" id="inPaciente" placeholder="Ej. Juan Pérez"
+                        class="w-full p-2 border rounded outline-none uppercase font-semibold text-sm">
                 </div>
 
-                <select id="selProc" class="w-full p-2 border rounded bg-gray-50 font-bold text-gray-700">
-                    <option value="">Seleccionar Procedimiento...</option>
-                    <option value="extraccion">Extracción Dental</option>
-                </select>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase">Edad</label>
+                        <input type="text" id="inEdad" placeholder="Edad" class="p-2 border rounded w-full">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase">Fecha</label>
+                        <input type="text" id="inFecha"
+                            class="p-2 border rounded bg-gray-100 text-gray-500 text-xs w-full" readonly>
+                    </div>
+                </div>
 
-                <textarea id="inPres" rows="4" placeholder="Prescripción..."
-                    class="w-full p-2 border rounded text-sm italic"></textarea>
-                <textarea id="inInd" rows="4" placeholder="Indicaciones..."
-                    class="w-full p-2 border rounded text-[10px]"></textarea>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase">Tipo Paciente</label>
+                        <select id="selTipoPaciente" class="w-full p-2 border rounded bg-white font-bold text-sm">
+                            <option value="adulto">Adulto</option>
+                            <option value="nino">Niño</option>
+                        </select>
+                    </div>
+
+                    <div id="divRangoNino" class="space-y-1 hidden">
+                        <label class="text-[10px] font-bold text-blue-600 uppercase">Rango Edad</label>
+                        <select id="selRangoNino" class="w-full p-2 border border-blue-200 rounded bg-blue-50 text-sm">
+                            <option value="5-6">5 a 6 años</option>
+                            <option value="2">2 años</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase">Procedimiento</label>
+                    <select id="selProc" class="w-full p-2 border rounded bg-gray-50 font-bold text-gray-700 text-sm">
+                        <option value="">Seleccionar...</option>
+                        <option value="extraccion">Extracción Dental</option>
+                        <option value="periodoncia">Periodoncia</option>
+                        <option value="alveolitis">Alveolitis</option>
+                    </select>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase">Prescripción</label>
+                    <textarea id="inPres" rows="4" class="w-full p-2 border rounded text-sm italic"></textarea>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase">Indicaciones</label>
+                    <textarea id="inInd" rows="4" class="w-full p-2 border rounded text-[10px]"></textarea>
+                </div>
 
                 <button onclick="descargarPDF()"
-                    class="w-full bg-[#243e36] text-white py-4 rounded-xl font-bold hover:bg-black transition-all">
+                    class="w-full bg-[#243e36] text-white py-4 rounded-xl font-bold hover:bg-black transition-all shadow-lg active:scale-95">
                     DESCARGAR PDF
                 </button>
             </div>
         </div>
 
-        <div class="lg:col-span-3">
-            <div id="receta" class="page-landscape">
-                <div class="logo-circle">
-                    <img src="denta.png" alt="Logo">
-                </div>
+        <div class="w-full lg:w-3/4">
+            <div class="receta-wrapper">
+                <div id="receta" class="page-landscape">
+                    <div class="logo-circle">
+                        <img src="denta.png" alt="Logo" >
+                    </div>
 
-                <div class="header-container">
-                    <div class="absolute inset-0 flex flex-col justify-center items-center text-center pl-24 pr-10">
-                        <h1 class="font-alta text-white text-3xl tracking-[0.2em] mb-1">Consultorio Odontológico</h1>
-                        <h2 class="font-alta text-[#c2a37d] text-5xl font-bold tracking-[0.1em] uppercase">Alta Gracia
-                        </h2>
-                        <div class="w-full flex justify-between px-10 mt-6 text-[13px] text-white/80 italic">
-                            <div>CD. ANA PAULA GARCIA MIRANDA <span class="ml-4 text-[#c2a37d]">COP: 58688</span></div>
-                            <div class="text-right leading-tight">CITAS: 936311361 <br> LEONCIO PRADO 960 _ HUAMACHUCO
+                    <div class="header-container">
+                        <div class="absolute inset-0 flex flex-col justify-center items-center text-center pl-24 pr-10">
+                            <h1 class="font-alta text-white text-3xl tracking-[0.2em] mb-1">Consultorio Odontológico
+                            </h1>
+                            <h2 class="font-alta text-[#c2a37d] text-5xl font-bold tracking-[0.1em] uppercase">Alta
+                                Gracia</h2>
+                            <div class="w-full flex justify-between px-10 mt-6 text-[13px] text-white/80 italic">
+                                <div>CD. ANA PAULA GARCIA MIRANDA <span class="ml-4 text-[#c2a37d]">COP: 58688</span>
+                                </div>
+                                <div class="text-right leading-tight">CITAS: 936311361 <br> LEONCIO PRADO 960 _
+                                    HUAMACHUCO</div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="px-16 pt-12 pb-6 flex justify-between items-end text-[13px] font-bold text-gray-700">
-                    <div class="flex-grow flex border-b border-gray-400 pb-1 italic">PACIENTE: <span id="pvPaciente"
-                            class="font-normal ml-3 text-black not-italic uppercase"></span></div>
-                    <div class="w-32 flex border-b border-gray-400 pb-1 mx-6 italic">EDAD: <span id="pvEdad"
-                            class="font-normal ml-3 text-black not-italic"></span></div>
-                    <div class="w-44 flex border-b border-gray-400 pb-1 justify-end italic">FECHA: <span id="pvFecha"
-                            class="font-normal ml-3 text-black not-italic"></span></div>
-                </div>
+                    <div class="px-16 pt-12 pb-6 flex justify-between items-end text-[13px] font-bold text-gray-700">
+                        <div class="flex-grow flex border-b border-gray-400 pb-1 italic uppercase">PACIENTE: <span
+                                id="pvPaciente" class="font-normal ml-3 text-black not-italic uppercase"></span></div>
+                        <div class="w-32 flex border-b border-gray-400 pb-1 mx-6 italic uppercase">EDAD: <span
+                                id="pvEdad" class="font-normal ml-3 text-black not-italic"></span></div>
+                        <div class="w-44 flex border-b border-gray-400 pb-1 justify-end italic uppercase">FECHA: <span
+                                id="pvFecha" class="font-normal ml-3 text-black not-italic"></span></div>
+                    </div>
 
-                <div class="flex-grow flex px-16 py-8 relative">
-                    <div class="divider"></div>
+                    <div class="flex-grow flex px-16 py-8 relative">
+                        <div class="divider"></div>
+                        <img src="Dental-ico.png"
+                            class="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-80 opacity-[0.03] pointer-events-none">
+                        <img src="Dental-ico.png"
+                            class="absolute top-1/2 left-3/4 -translate-x-1/2 -translate-y-1/2 w-80 opacity-[0.03] pointer-events-none">
 
-                    <img src="Dental-ico.png"
-                        class="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-80 opacity-[0.03] pointer-events-none">
-                    <img src="Dental-ico.png"
-                        class="absolute top-1/2 left-3/4 -translate-x-1/2 -translate-y-1/2 w-80 opacity-[0.03] pointer-events-none">
-
-                    <div class="w-1/2 pr-12 z-10">
-                        <h3 class="text-center font-bold text-gray-400 tracking-[0.4em] text-xs mb-8">PRESCRIPCION</h3>
-                        <div id="pvPres"
-                            class="text-[14px] text-gray-800 whitespace-pre-line leading-relaxed italic min-h-[300px]">
+                        <div class="w-1/2 pr-12 z-10">
+                            <h3 class="text-center font-bold text-gray-400 tracking-[0.4em] text-xs mb-8 uppercase">
+                                Prescripción</h3>
+                            <div id="pvPres"
+                                class="text-[14px] text-gray-800 whitespace-pre-line leading-relaxed italic min-h-[300px]">
+                            </div>
+                        </div>
+                        <div class="w-1/2 pl-12 z-10">
+                            <h3 class="text-center font-bold text-gray-400 tracking-[0.4em] text-xs mb-8 uppercase">
+                                Indicaciones</h3>
+                            <div id="pvInd" class="text-[11px] text-gray-700 whitespace-pre-line leading-snug"></div>
                         </div>
                     </div>
-                    <div class="w-1/2 pl-12 z-10">
-                        <h3 class="text-center font-bold text-gray-400 tracking-[0.4em] text-xs mb-8">INDICACIONES</h3>
-                        <div id="pvInd" class="text-[11px] text-gray-700 whitespace-pre-line leading-snug"></div>
+
+                    <img src="sello-ana.jpg" class="absolute bottom-16 right-10 w-56 opacity-[0.9] pointer-events-none">
+
+                    <div class="footer-alta">
+                        <p class="text-white text-[12px] tracking-[0.7em] font-light italic uppercase">¡ Cuidamos tu
+                            salud dental !</p>
                     </div>
                 </div>
-
-                <div class="footer-alta">
-                    <p class="text-white text-[12px] tracking-[0.7em] font-light italic">¡ CUIDAMOS TU SALUD DENTAL !
-                    </p>
-                </div>
             </div>
+            <p class="text-center text-gray-500 text-xs mt-2 lg:hidden">← Desliza para ver la receta completa →</p>
         </div>
     </div>
 
     <script>
-        // Cargar fecha actual al iniciar
         window.onload = function () {
             const hoy = new Date();
-            const fechaFormateada = hoy.toLocaleDateString('es-ES', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
+            const fechaFormateada = hoy.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
             document.getElementById('inFecha').value = fechaFormateada;
             document.getElementById('pvFecha').innerText = fechaFormateada;
         };
 
-        function descargarPDF() {
-            const elemento = document.getElementById('receta');
-            const nombrePaciente = document.getElementById('inPaciente').value || 'Paciente';
-
-            const opciones = {
-                margin: 0,
-                filename: `Receta_${nombrePaciente}.pdf`,
-                image: { type: 'jpeg', quality: 1 },
-                html2canvas: { scale: 3, useCORS: true },
-                jsPDF: { unit: 'px', format: [1122, 794], orientation: 'landscape' }
-            };
-
-            html2pdf().set(opciones).from(elemento).save();
-        }
-
-        // Sincronización de campos
-        const campos = ['inPaciente', 'inEdad', 'inPres', 'inInd'];
-        campos.forEach(id => {
-            document.getElementById(id).addEventListener('input', (e) => {
-                document.getElementById(id.replace('in', 'pv')).innerText = e.target.value;
-            });
-        });
-        const recetasPredefinidas = {
-            "extraccion": {
+        const recetasData = {
+            "periodoncia": {
+                p: "No se requiere prescripción farmacológica específica.",
+                i: "Realizar enjuagues con 5 ml de VITIS sin diluir, durante 30 segundos, como mínimo 2 veces al día después de cada cepillado.\n\nPara una mayor eficacia es recomendable no mezclar con agua y evitar comer o beber inmediatamente después de su uso."
+            },
+            "alveolitis": {
+                p: "- Amoxicilina 500 mg + Ácido Clavulánico 125 mg x 5 días (#15 tabletas).\nTomar 1 tableta cada 8 horas.\n\n- Etoricoxib 120 mg x 3 días.\nTomar 1 tableta una vez al día.\n\n* Tomar después de cada comida.",
+                i: "- Mantener la zona limpia.\n- No succionar la herida.\n- Seguir la medicación al pie de la letra."
+            },
+            "extraccion_adulto": {
                 p: "1. Amoxicilina 500mg\nTomar 1 tableta cada 8 horas por 5 días.\n\n2. Ibuprofeno 400mg\nTomar 1 tableta cada 8 horas por 3 días.",
-                i: "HAY QUE EVITAR:\n- FUMAR\n- ENJUAGAR Y ESCUPIR LAS PRIMERAS 24 HRS.\n- ACTIVIDAD FISICA POR 3 DIAS.\n- EXPOSICION AL SOL.\n- COMIDAS CALIENTES Y PICANTES.\n- ARROZ POR 3 DIAS.\n\nDIETA:\nHay que cuidar lo que comemos para evitar que ingrese algún fragmento alimenticio.\n- COMER DESPUÉS DE LAS 2 HORAS FINALIZADA LA INTERVENCIÓN.\n- HELADO.\n- VERDURAS AL VAPOR.\n- SOPA."
+                i: "HAY QUE EVITAR:\n- FUMAR\n- ENJUAGAR Y ESCUPIR LAS PRIMERAS 24 HRS.\n- ACTIVIDAD FISICA POR 3 DIAS.\n- EXPOSICION AL SOL.\n- COMIDAS CALIENTES Y PICANTES.\n- ARROZ POR 3 DIAS.\n\nDIETA:\n- COMER DESPUÉS DE LAS 2 HORAS.\n- HELADO.\n- VERDURAS AL VAPOR.\n- SOPA."
+            },
+            "extraccion_nino_5-6": {
+                p: "- Jarabe Amoxicilina 250 mg x 5 días: 7 ml cada 8 hora.\n- Jarabe Ibuprofeno 100 mg x 2 días: 7 ml cada 8 horas.\n\n* Las dos juntas después de cada comida.",
+                i: "- No realizar esfuerzos físicos.\n- Dieta blanda y fría.\n- No usar sorbetes."
+            },
+            "extraccion_nino_2": {
+                p: "- Amoxicilina 250 mg x 5 días: 5 ml cada 8 hora.\n- Ibuprofeno 100 mg x 2 días: 5 ml cada 8 horas.\n\n* Las dos juntas después de cada comida.",
+                i: "- Vigilar que no se muerda el labio.\n- Dieta blanda y fría."
             }
         };
 
-        document.getElementById('selProc').addEventListener('change', (e) => {
-            const proc = e.target.value;
-            if (recetasPredefinidas[proc]) {
-                document.getElementById('inPres').value = recetasPredefinidas[proc].p;
-                document.getElementById('inInd').value = recetasPredefinidas[proc].i;
-                document.getElementById('pvPres').innerText = recetasPredefinidas[proc].p;
-                document.getElementById('pvInd').innerText = recetasPredefinidas[proc].i;
+        document.getElementById('selTipoPaciente').addEventListener('change', function () {
+            const divRango = document.getElementById('divRangoNino');
+            this.value === 'nino' ? divRango.classList.remove('hidden') : divRango.classList.add('hidden');
+            actualizarContenido();
+        });
+
+        document.getElementById('selRangoNino').addEventListener('change', actualizarContenido);
+        document.getElementById('selProc').addEventListener('change', actualizarContenido);
+
+        function actualizarContenido() {
+            const proc = document.getElementById('selProc').value;
+            const tipo = document.getElementById('selTipoPaciente').value;
+            const rango = document.getElementById('selRangoNino').value;
+            let clave = proc === 'extraccion' ? (tipo === 'adulto' ? 'extraccion_adulto' : `extraccion_nino_${rango}`) : proc;
+            if (recetasData[clave]) {
+                document.getElementById('inPres').value = recetasData[clave].p;
+                document.getElementById('inInd').value = recetasData[clave].i;
+                document.getElementById('pvPres').innerText = recetasData[clave].p;
+                document.getElementById('pvInd').innerText = recetasData[clave].i;
             }
+        }
+
+        function descargarPDF() {
+            const elemento = document.getElementById('receta');
+            const nombre = document.getElementById('inPaciente').value || 'Paciente';
+            html2pdf().set({
+                margin: 0,
+                filename: `Receta_${nombre}.pdf`,
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { scale: 3, useCORS: true },
+                jsPDF: { unit: 'px', format: [1122, 794], orientation: 'landscape' }
+            }).from(elemento).save();
+        }
+
+        ['inPaciente', 'inEdad', 'inPres', 'inInd'].forEach(id => {
+            document.getElementById(id).addEventListener('input', (e) => {
+                document.getElementById(id.replace('in', 'pv')).innerText = e.target.value;
+            });
         });
     </script>
 </body>
