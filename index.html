@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recetario Alta Gracia - Responsive</title>
+    <title>Recetario Alta Gracia - Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -19,23 +19,29 @@
             font-family: 'Cinzel', serif;
         }
 
-        /* Contenedor para scroll en móviles */
-        .receta-wrapper {
-            overflow-x: auto;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .page-landscape {
-            width: 1122px;
-            min-width: 1122px;
-            /* Evita que se encoja en móviles */
-            height: 794px;
+        /* CONTENEDOR INTELIGENTE: Escala la receta para que quepa en pantalla */
+        .receta-container {
+            width: 100%;
+            max-width: 1122px;
+            aspect-ratio: 1122 / 794;
             background: white;
             position: relative;
             overflow: hidden;
+            /* Corta lo que sobra visualmente en el renderizado */
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            margin: auto;
+        }
+
+        /* La hoja real siempre mide esto */
+        #receta {
+            width: 1122px;
+            height: 794px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: top left;
+            /* Punto de anclaje para el escalado */
+            background: white;
         }
 
         .header-container {
@@ -82,13 +88,7 @@
             justify-content: center;
         }
 
-        /* Estilo para que el PDF se genere bien */
         @media print {
-            body {
-                background: white;
-                padding: 0;
-            }
-
             .no-print {
                 display: none !important;
             }
@@ -131,7 +131,6 @@
                             <option value="nino">Niño</option>
                         </select>
                     </div>
-
                     <div id="divRangoNino" class="space-y-1 hidden">
                         <label class="text-[10px] font-bold text-blue-600 uppercase">Rango Edad</label>
                         <select id="selRangoNino" class="w-full p-2 border border-blue-200 rounded bg-blue-50 text-sm">
@@ -168,9 +167,9 @@
             </div>
         </div>
 
-        <div class="w-full lg:w-3/4">
-            <div class="receta-wrapper">
-                <div id="receta" class="page-landscape">
+        <div class="w-full lg:w-3/4 flex justify-center items-start">
+            <div id="recetaContainer" class="receta-container">
+                <div id="receta">
                     <div class="logo-circle">
                         <img src="denta.png" alt="Logo" >
                     </div>
@@ -228,12 +227,22 @@
                     </div>
                 </div>
             </div>
-            <p class="text-center text-gray-500 text-xs mt-2 lg:hidden">← Desliza para ver la receta completa →</p>
         </div>
     </div>
 
     <script>
+        // FUNCIÓN CLAVE: Escala el contenido para que quepa siempre en el contenedor
+        function ajustarEscala() {
+            const container = document.getElementById('recetaContainer');
+            const content = document.getElementById('receta');
+            const escala = container.offsetWidth / 1122;
+            content.style.transform = `scale(${escala})`;
+        }
+
+        window.addEventListener('resize', ajustarEscala);
+
         window.onload = function () {
+            ajustarEscala();
             const hoy = new Date();
             const fechaFormateada = hoy.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
             document.getElementById('inFecha').value = fechaFormateada;
@@ -285,18 +294,76 @@
             }
         }
 
-        function descargarPDF() {
-            const elemento = document.getElementById('receta');
-            const nombre = document.getElementById('inPaciente').value || 'Paciente';
-            html2pdf().set({
-                margin: 0,
-                filename: `Receta_${nombre}.pdf`,
-                image: { type: 'jpeg', quality: 1 },
-                html2canvas: { scale: 3, useCORS: true },
-                jsPDF: { unit: 'px', format: [1122, 794], orientation: 'landscape' }
-            }).from(elemento).save();
-        }
+async function descargarPDF() {
+    const elementoOriginal = document.getElementById('receta');
+    const nombre = document.getElementById('inPaciente').value || 'Paciente';
+    const btn = document.querySelector('button');
 
+    btn.innerText = "GENERANDO...";
+    btn.disabled = true;
+
+    // 1. Creamos un contenedor temporal "invisible" pero con tamaño real
+    const tempContainer = document.createElement('div');
+    Object.assign(tempContainer.style, {
+        position: 'absolute',
+        left: '-9999px',
+        top: '0',
+        width: '1122px',
+        height: '794px',
+        overflow: 'hidden'
+    });
+
+    // 2. Clonamos la receta y la metemos en ese contenedor limpio
+    const clon = elementoOriginal.cloneNode(true);
+    clon.style.transform = "none"; // Quitamos cualquier escalado
+    clon.style.position = "relative";
+    clon.style.left = "0";
+    clon.style.top = "0";
+    
+    tempContainer.appendChild(clon);
+    document.body.appendChild(tempContainer);
+
+    // 3. Esperamos a que las imágenes se carguen en el clon
+    const imagenes = clon.querySelectorAll('img');
+    await Promise.all(Array.from(imagenes).map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; });
+    }));
+
+    const opciones = {
+        margin: 0,
+        filename: `Receta_${nombre}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            width: 1122,
+            height: 794,
+            windowWidth: 1122, // Forzamos el ancho de la "ventana" de captura
+            x: 0, // Aseguramos que empiece en el borde izquierdo
+            y: 0  // Aseguramos que empiece en el borde superior
+        },
+        jsPDF: {
+            unit: 'px',
+            format: [1122, 794],
+            orientation: 'landscape'
+        }
+    };
+
+    // 4. Pequeña pausa para asegurar el renderizado de fuentes y colores
+    setTimeout(async () => {
+        try {
+            await html2pdf().set(opciones).from(clon).save();
+        } catch (error) {
+            console.error("Error:", error);
+        } finally {
+            document.body.removeChild(tempContainer);
+            btn.innerText = "DESCARGAR PDF";
+            btn.disabled = false;
+        }
+    }, 500);
+}
         ['inPaciente', 'inEdad', 'inPres', 'inInd'].forEach(id => {
             document.getElementById(id).addEventListener('input', (e) => {
                 document.getElementById(id.replace('in', 'pv')).innerText = e.target.value;
