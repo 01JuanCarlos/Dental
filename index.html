@@ -10,8 +10,14 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Montserrat:wght@400;700&display=swap');
 
-        body { font-family: 'Montserrat', sans-serif; background-color: #d1d5db; }
-        .font-alta { font-family: 'Cinzel', serif; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #d1d5db;
+        }
+
+        .font-alta {
+            font-family: 'Cinzel', serif;
+        }
 
         .receta-container {
             width: 100%;
@@ -49,7 +55,7 @@
             left: 3px;
             top: 25px;
             height: 130px;
-        
+
             background: white;
             z-index: 20;
             display: flex;
@@ -84,14 +90,16 @@
 <body class="p-2 md:p-10">
     <div class="max-w-[1600px] mx-auto flex flex-col lg:flex-row gap-6">
 
-        <div id="panelControl" class="w-full lg:w-1/4 bg-white p-6 rounded-2xl shadow-xl border-t-8 border-[#243e36] h-fit">
+        <div id="panelControl"
+            class="w-full lg:w-1/4 bg-white p-6 rounded-2xl shadow-xl border-t-8 border-[#243e36] h-fit">
             <h2 class="text-xl font-bold mb-4 text-[#243e36] flex items-center gap-2">
                 <span>🦷</span> Panel de Control
             </h2>
             <div class="space-y-4">
                 <div class="space-y-1">
                     <label class="text-[10px] font-bold text-gray-400 uppercase">Nombre del Paciente</label>
-                    <input type="text" id="inPaciente" placeholder="Ej. Juan Pérez" class="w-full p-2 border rounded outline-none uppercase font-semibold text-sm">
+                    <input type="text" id="inPaciente" placeholder="Ej. Juan Pérez"
+                        class="w-full p-2 border rounded outline-none uppercase font-semibold text-sm">
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
@@ -101,7 +109,8 @@
                     </div>
                     <div class="space-y-1">
                         <label class="text-[10px] font-bold text-gray-400 uppercase">Fecha</label>
-                        <input type="text" id="inFecha" class="p-2 border rounded bg-gray-100 text-gray-500 text-xs w-full" readonly>
+                        <input type="text" id="inFecha"
+                            class="p-2 border rounded bg-gray-100 text-gray-500 text-xs w-full" readonly>
                     </div>
                 </div>
 
@@ -142,7 +151,8 @@
                     <textarea id="inInd" rows="4" class="w-full p-2 border rounded text-[10px]"></textarea>
                 </div>
 
-                <button onclick="descargarPDF()" class="w-full bg-[#243e36] text-white py-4 rounded-xl font-bold hover:bg-black transition-all shadow-lg active:scale-95">
+                <button onclick="descargarPDF()"
+                    class="w-full bg-[#243e36] text-white py-4 rounded-xl font-bold hover:bg-black transition-all shadow-lg active:scale-95">
                     DESCARGAR PDF
                 </button>
             </div>
@@ -152,38 +162,50 @@
             <div id="recetaContainer" class="receta-container">
                 <div id="receta">
                     <div class="logo-circle">
-                        <img src="denta.png" alt="Logo" >
+                        <img src="denta.png" alt="Logo">
                     </div>
                     <div class="header-container">
                         <div class="absolute inset-0 flex flex-col justify-center items-center text-center pl-24 pr-10">
-                            <h1 class="font-alta text-white text-3xl tracking-[0.2em] mb-1">Consultorio Odontológico</h1>
-                            <h2 class="font-alta text-[#c2a37d] text-5xl font-bold tracking-[0.1em] uppercase">Alta Gracia</h2>
+                            <h1 class="font-alta text-white text-3xl tracking-[0.2em] mb-1">Consultorio Odontológico
+                            </h1>
+                            <h2 class="font-alta text-[#c2a37d] text-5xl font-bold tracking-[0.1em] uppercase">Alta
+                                Gracia</h2>
                             <div class="w-full flex justify-between px-10 mt-6 text-[13px] text-white/80 italic">
-                                <div>CD. ANA PAULA GARCIA MIRANDA <span class="ml-4 text-[#c2a37d]">COP: 58688</span></div>
-                                <div class="text-right leading-tight">CITAS: 936311361 <br> LEONCIO PRADO 960 _ HUAMACHUCO</div>
+                                <div>CD. ANA PAULA GARCIA MIRANDA <span class="ml-4 text-[#c2a37d]">COP: 58688</span>
+                                </div>
+                                <div class="text-right leading-tight">CITAS: 936311361 <br> LEONCIO PRADO 960 _
+                                    HUAMACHUCO</div>
                             </div>
                         </div>
                     </div>
 
                     <div class="px-16 pt-12 pb-6 flex justify-between items-end text-[13px] font-bold text-gray-700">
-                        <div class="flex-grow flex border-b border-gray-400 pb-1 italic uppercase">PACIENTE: <span id="pvPaciente" class="font-normal ml-3 text-black not-italic uppercase"></span></div>
-                        <div class="w-32 flex border-b border-gray-400 pb-1 mx-6 italic uppercase">EDAD: <span id="pvEdad" class="font-normal ml-3 text-black not-italic"></span></div>
-                        <div class="w-44 flex border-b border-gray-400 pb-1 justify-end italic uppercase">FECHA: <span id="pvFecha" class="font-normal ml-3 text-black not-italic"></span></div>
+                        <div class="flex-grow flex border-b border-gray-400 pb-1 italic uppercase">PACIENTE: <span
+                                id="pvPaciente" class="font-normal ml-3 text-black not-italic uppercase"></span></div>
+                        <div class="w-32 flex border-b border-gray-400 pb-1 mx-6 italic uppercase">EDAD: <span
+                                id="pvEdad" class="font-normal ml-3 text-black not-italic"></span></div>
+                        <div class="w-44 flex border-b border-gray-400 pb-1 justify-end italic uppercase">FECHA: <span
+                                id="pvFecha" class="font-normal ml-3 text-black not-italic"></span></div>
                     </div>
 
                     <div class="flex-grow flex px-16 py-8 relative">
                         <div class="divider"></div>
                         <div class="w-1/2 pr-12 z-10">
-                            <h3 class="text-center font-bold text-gray-400 tracking-[0.4em] text-xs mb-8 uppercase">Prescripción</h3>
-                            <div id="pvPres" class="text-[14px] text-gray-800 whitespace-pre-line leading-relaxed italic min-h-[300px]"></div>
+                            <h3 class="text-center font-bold text-gray-400 tracking-[0.4em] text-xs mb-8 uppercase">
+                                Prescripción</h3>
+                            <div id="pvPres"
+                                class="text-[14px] text-gray-800 whitespace-pre-line leading-relaxed italic min-h-[300px]">
+                            </div>
                         </div>
                         <div class="w-1/2 pl-12 z-10">
-                            <h3 class="text-center font-bold text-gray-400 tracking-[0.4em] text-xs mb-8 uppercase">Indicaciones</h3>
+                            <h3 class="text-center font-bold text-gray-400 tracking-[0.4em] text-xs mb-8 uppercase">
+                                Indicaciones</h3>
                             <div id="pvInd" class="text-[11px] text-gray-700 whitespace-pre-line leading-snug"></div>
                         </div>
                     </div>
                     <div class="footer-alta">
-                        <p class="text-white text-[12px] tracking-[0.7em] font-light italic uppercase">¡ Cuidamos tu salud dental !</p>
+                        <p class="text-white text-[12px] tracking-[0.7em] font-light italic uppercase">¡ Cuidamos tu
+                            salud dental !</p>
                     </div>
                 </div>
             </div>
@@ -191,7 +213,61 @@
     </div>
 
     <script>
- async function descargarPDF() {
+        // --- LÓGICA DE INTERFAZ ---
+        function ajustarEscala() {
+            const container = document.getElementById('recetaContainer');
+            const content = document.getElementById('receta');
+            const escala = container.offsetWidth / 1122;
+            content.style.transform = `scale(${escala})`;
+        }
+        window.addEventListener('resize', ajustarEscala);
+
+        window.onload = function () {
+            ajustarEscala();
+            const hoy = new Date();
+            const fechaFormateada = hoy.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            document.getElementById('inFecha').value = fechaFormateada;
+            document.getElementById('pvFecha').innerText = fechaFormateada;
+        };
+
+        const recetasData = {
+            "periodoncia": { p: "No se requiere prescripción farmacológica específica.", i: "Realizar enjuagues con 5 ml de VITIS sin diluir, durante 30 segundos, como mínimo 2 veces al día después de cada cepillado.\n\nEvitar comer o beber inmediatamente después de su uso." },
+            "alveolitis": { p: "- Amoxicilina 500 mg + Ácido Clavulánico 125 mg x 5 días.\nTomar 1 tableta cada 8 horas.\n\n- Etoricoxib 120 mg x 3 días.\nTomar 1 tableta una vez al día.", i: "- Mantener la zona limpia.\n- No succionar la herida.\n- Seguir la medicación al pie de la letra." },
+            "extraccion_adulto": { p: "1. Amoxicilina 500mg\nTomar 1 tableta cada 8 horas por 5 días.\n\n2. Ibuprofeno 400mg\nTomar 1 tableta cada 8 horas por 3 días.", i: "EVITAR:\n- FUMAR\n- ESCUPIR LAS PRIMERAS 24 HRS.\n- ACTIVIDAD FISICA POR 3 DIAS.\n- SOL Y COMIDAS PICANTES.\n\nDIETA:\n- HELADO.\n- VERDURAS AL VAPOR.\n- SOPA FRÍA." },
+            "extraccion_nino_5-6": { p: "- Jarabe Amoxicilina 250 mg x 5 días: 7 ml cada 8 horas.\n- Jarabe Ibuprofeno 100 mg x 2 días: 7 ml cada 8 horas.", i: "- No realizar esfuerzos físicos.\n- Dieta blanda y fría.\n- No usar sorbetes." },
+            "extraccion_nino_2": { p: "- Amoxicilina 250 mg x 5 días: 5 ml cada 8 horas.\n- Ibuprofeno 100 mg x 2 días: 5 ml cada 8 horas.", i: "- Vigilar que no se muerda el labio.\n- Dieta blanda y fría." }
+        };
+
+        document.getElementById('selTipoPaciente').addEventListener('change', function () {
+            const divRango = document.getElementById('divRangoNino');
+            this.value === 'nino' ? divRango.classList.remove('hidden') : divRango.classList.add('hidden');
+            actualizarContenido();
+        });
+
+        document.getElementById('selRangoNino').addEventListener('change', actualizarContenido);
+        document.getElementById('selProc').addEventListener('change', actualizarContenido);
+
+        function actualizarContenido() {
+            const proc = document.getElementById('selProc').value;
+            const tipo = document.getElementById('selTipoPaciente').value;
+            const rango = document.getElementById('selRangoNino').value;
+            let clave = proc === 'extraccion' ? (tipo === 'adulto' ? 'extraccion_adulto' : `extraccion_nino_${rango}`) : proc;
+            if (recetasData[clave]) {
+                document.getElementById('inPres').value = recetasData[clave].p;
+                document.getElementById('inInd').value = recetasData[clave].i;
+                document.getElementById('pvPres').innerText = recetasData[clave].p;
+                document.getElementById('pvInd').innerText = recetasData[clave].i;
+            }
+        }
+
+        ['inPaciente', 'inEdad', 'inPres', 'inInd'].forEach(id => {
+            document.getElementById(id).addEventListener('input', (e) => {
+                document.getElementById(id.replace('in', 'pv')).innerText = e.target.value;
+            });
+        });
+
+        // --- NUEVA LÓGICA DE PDF-LIB ---
+     async function descargarPDF() {
     const { PDFDocument, rgb, StandardFonts } = PDFLib;
     const btn = document.querySelector('button');
     const originalText = btn.innerText;
@@ -203,25 +279,25 @@
         // 1. Crear documento
         const pdfDoc = await PDFDocument.create();
         
-        // 2. Cargar la imagen de fondo
-        // Nota: Si esto falla en local por CORS, prueba subiendo la imagen a un hosting o convirtiéndola a Base64
+        // 2. Cargar la imagen de fondo (plantilla)
+        // Nota: Asegúrate de que 'plantilla.png' esté en la misma carpeta que el HTML
         const response = await fetch('plantilla.png');
-        if (!response.ok) throw new Error("No se pudo cargar la imagen 'plantilla.png'");
+        if (!response.ok) throw new Error("No se pudo cargar la imagen de la plantilla");
         const imageBytes = await response.arrayBuffer();
         
         let fondoImg;
         try {
             fondoImg = await pdfDoc.embedPng(imageBytes);
         } catch (e) {
-            // Si no es PNG, intentamos cargarlo como JPG
+            // Intenta cargar como JPG si falla como PNG
             fondoImg = await pdfDoc.embedJpg(imageBytes);
         }
 
-        // 3. Añadir página (Tamaño A4 horizontal aprox: 1122x794 px a 96dpi)
+        // 3. Añadir página (A4 Horizontal en px: 1122x794)
         const page = pdfDoc.addPage([1122, 794]);
         const { width, height } = page.getSize();
 
-        // Dibujar fondo
+        // Dibujar el fondo cubriendo toda la página
         page.drawImage(fondoImg, {
             x: 0,
             y: 0,
@@ -229,74 +305,80 @@
             height: height,
         });
 
-        // 4. Configurar fuentes
+        // 4. Configurar fuentes estándar de pdf-lib
         const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
         const fontItalic = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
 
-        // 5. Capturar datos
+        // 5. Capturar datos dinámicos de los inputs
         const nombre = document.getElementById('inPaciente').value.toUpperCase() || '';
         const edad = document.getElementById('inEdad').value || '';
+        // La fecha ya viene pre-formateada en 'inFecha'
         const fecha = document.getElementById('inFecha').value;
         const prescripcion = document.getElementById('inPres').value;
         const indicaciones = document.getElementById('inInd').value;
 
         const colorTexto = rgb(0, 0, 0); // Negro puro para mejor legibilidad al imprimir
 
-        // 6. Posicionar texto (Y se cuenta desde abajo hacia arriba)
-        // Datos cabecera
-        page.drawText(nombre, { x: 155, y: 532, size: 14, font: fontRegular, color: colorTexto });
-        page.drawText(edad, { x: 710, y: 532, size: 14, font: fontRegular, color: colorTexto });
-        page.drawText(fecha, { x: 930, y: 532, size: 14, font: fontRegular, color: colorTexto });
+        // --- 6. POSICIONAR TEXTO DINÁMICO ---
+        // El origen (0,0) está en la esquina inferior izquierda
 
-        // Prescripción (Multi-línea)
+        // DATOS DE CABECERA (Y ≈ 532 es la línea horizontal)
+        // Paciente
+        page.drawText(nombre, { x: 155, y: 597, size: 14, font: fontRegular, color: colorTexto });
+        // Edad
+        page.drawText(edad, { x: 750, y: 597, size: 14, font: fontRegular, color: colorTexto });
+        // Fecha
+        page.drawText(fecha, { x: 1015, y: 597, size: 14, font: fontRegular, color: colorTexto });
+
+        // TEXTOS MULTI-LÍNEA INFERIORES
+
+        // Prescripción (Lado izquierdo, itálica)
         page.drawText(prescripcion, {
-            x: 100,
-            y: 460, 
+            x: 100, // Coordenada X de inicio
+            y: 460, // Coordenada Y de inicio (comienza más abajo que la cabecera)
             size: 13,
             font: fontItalic,
             lineHeight: 18,
-            maxWidth: 420,
+            maxWidth: 420, // Ancho máximo antes de hacer salto de línea automático
             color: colorTexto
         });
 
-        // Indicaciones (Multi-línea)
+        // Indicaciones (Lado derecho, regular)
         page.drawText(indicaciones, {
-            x: 610,
-            y: 460,
+            x: 610, // Coordenada X de inicio
+            y: 460, // Coordenada Y de inicio
             size: 11,
             font: fontRegular,
             lineHeight: 15,
-            maxWidth: 420,
+            maxWidth: 420, // Ancho máximo
             color: colorTexto
         });
 
-        // 7. Generar y descargar
+        // 7. Generar y descargar el archivo de forma compatible
         const pdfBytes = await pdfDoc.save();
         const blob = new Blob([pdfBytes], { type: 'application/pdf' });
         
-        // Método compatible con PC y Móvil
+        // Crear nombre de archivo basado en el paciente
         const fileName = `Receta_${nombre.replace(/\s+/g, '_') || 'Paciente'}.pdf`;
         
-        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-            // Para IE/Edge antiguo
-            window.navigator.msSaveOrOpenBlob(blob, fileName);
-        } else {
-            // Para Chrome, Firefox, Safari (incluido móviles)
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-            }, 100);
-        }
+        // Método de descarga compatible con PC y Móvil
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a); // Necesario para Firefox móvil
+        a.click();
+        
+        // Limpieza
+        setTimeout(() => {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 100);
 
     } catch (err) {
         console.error("Error al generar el PDF:", err);
-        alert("Error: " + err.message);
+        alert("Ocurrió un error al generar el PDF: " + err.message);
     } finally {
         btn.innerText = originalText;
         btn.disabled = false;
