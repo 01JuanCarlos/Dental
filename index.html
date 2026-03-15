@@ -7,6 +7,8 @@
     <title>Recetario Alta Gracia - Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#000000">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Montserrat:wght@400;700&display=swap');
 
@@ -267,123 +269,131 @@
         });
 
         // --- NUEVA LÓGICA DE PDF-LIB ---
-     async function descargarPDF() {
-    const { PDFDocument, rgb, StandardFonts } = PDFLib;
-    const btn = document.querySelector('button');
-    const originalText = btn.innerText;
-    
-    btn.innerText = "GENERANDO...";
-    btn.disabled = true;
+        async function descargarPDF() {
+            const { PDFDocument, rgb, StandardFonts } = PDFLib;
+            const btn = document.querySelector('button');
+            const originalText = btn.innerText;
 
-    try {
-        // 1. Crear documento
-        const pdfDoc = await PDFDocument.create();
-        
-        // 2. Cargar la imagen de fondo (plantilla)
-        // Nota: Asegúrate de que 'plantilla.png' esté en la misma carpeta que el HTML
-        const response = await fetch('plantilla.png');
-        if (!response.ok) throw new Error("No se pudo cargar la imagen de la plantilla");
-        const imageBytes = await response.arrayBuffer();
-        
-        let fondoImg;
-        try {
-            fondoImg = await pdfDoc.embedPng(imageBytes);
-        } catch (e) {
-            // Intenta cargar como JPG si falla como PNG
-            fondoImg = await pdfDoc.embedJpg(imageBytes);
+            btn.innerText = "GENERANDO...";
+            btn.disabled = true;
+
+            try {
+                // 1. Crear documento
+                const pdfDoc = await PDFDocument.create();
+
+                // 2. Cargar la imagen de fondo (plantilla)
+                // Nota: Asegúrate de que 'plantilla.png' esté en la misma carpeta que el HTML
+                const response = await fetch('plantilla.png');
+                if (!response.ok) throw new Error("No se pudo cargar la imagen de la plantilla");
+                const imageBytes = await response.arrayBuffer();
+
+                let fondoImg;
+                try {
+                    fondoImg = await pdfDoc.embedPng(imageBytes);
+                } catch (e) {
+                    // Intenta cargar como JPG si falla como PNG
+                    fondoImg = await pdfDoc.embedJpg(imageBytes);
+                }
+
+                // 3. Añadir página (A4 Horizontal en px: 1122x794)
+                const page = pdfDoc.addPage([1122, 794]);
+                const { width, height } = page.getSize();
+
+                // Dibujar el fondo cubriendo toda la página
+                page.drawImage(fondoImg, {
+                    x: 0,
+                    y: 0,
+                    width: width,
+                    height: height,
+                });
+
+                // 4. Configurar fuentes estándar de pdf-lib
+                const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+                const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+                const fontItalic = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
+
+                // 5. Capturar datos dinámicos de los inputs
+                const nombre = document.getElementById('inPaciente').value.toUpperCase() || '';
+                const edad = document.getElementById('inEdad').value || '';
+                // La fecha ya viene pre-formateada en 'inFecha'
+                const fecha = document.getElementById('inFecha').value;
+                const prescripcion = document.getElementById('inPres').value;
+                const indicaciones = document.getElementById('inInd').value;
+
+                const colorTexto = rgb(0, 0, 0); // Negro puro para mejor legibilidad al imprimir
+
+                // --- 6. POSICIONAR TEXTO DINÁMICO ---
+                // El origen (0,0) está en la esquina inferior izquierda
+
+                // DATOS DE CABECERA (Y ≈ 532 es la línea horizontal)
+                // Paciente
+                page.drawText(nombre, { x: 155, y: 597, size: 14, font: fontRegular, color: colorTexto });
+                // Edad
+                page.drawText(edad, { x: 750, y: 597, size: 14, font: fontRegular, color: colorTexto });
+                // Fecha
+                page.drawText(fecha, { x: 1015, y: 597, size: 14, font: fontRegular, color: colorTexto });
+
+                // TEXTOS MULTI-LÍNEA INFERIORES
+
+                // Prescripción (Lado izquierdo, itálica)
+                page.drawText(prescripcion, {
+                    x: 100, // Coordenada X de inicio
+                    y: 460, // Coordenada Y de inicio (comienza más abajo que la cabecera)
+                    size: 13,
+                    font: fontItalic,
+                    lineHeight: 18,
+                    maxWidth: 420, // Ancho máximo antes de hacer salto de línea automático
+                    color: colorTexto
+                });
+
+                // Indicaciones (Lado derecho, regular)
+                page.drawText(indicaciones, {
+                    x: 610, // Coordenada X de inicio
+                    y: 460, // Coordenada Y de inicio
+                    size: 11,
+                    font: fontRegular,
+                    lineHeight: 15,
+                    maxWidth: 420, // Ancho máximo
+                    color: colorTexto
+                });
+
+                // 7. Generar y descargar el archivo de forma compatible
+                const pdfBytes = await pdfDoc.save();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+
+                // Crear nombre de archivo basado en el paciente
+                const fileName = `Receta_${nombre.replace(/\s+/g, '_') || 'Paciente'}.pdf`;
+
+                // Método de descarga compatible con PC y Móvil
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a); // Necesario para Firefox móvil
+                a.click();
+
+                // Limpieza
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 100);
+
+            } catch (err) {
+                console.error("Error al generar el PDF:", err);
+                alert("Ocurrió un error al generar el PDF: " + err.message);
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
         }
+    </script>
 
-        // 3. Añadir página (A4 Horizontal en px: 1122x794)
-        const page = pdfDoc.addPage([1122, 794]);
-        const { width, height } = page.getSize();
-
-        // Dibujar el fondo cubriendo toda la página
-        page.drawImage(fondoImg, {
-            x: 0,
-            y: 0,
-            width: width,
-            height: height,
-        });
-
-        // 4. Configurar fuentes estándar de pdf-lib
-        const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
-        const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-        const fontItalic = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
-
-        // 5. Capturar datos dinámicos de los inputs
-        const nombre = document.getElementById('inPaciente').value.toUpperCase() || '';
-        const edad = document.getElementById('inEdad').value || '';
-        // La fecha ya viene pre-formateada en 'inFecha'
-        const fecha = document.getElementById('inFecha').value;
-        const prescripcion = document.getElementById('inPres').value;
-        const indicaciones = document.getElementById('inInd').value;
-
-        const colorTexto = rgb(0, 0, 0); // Negro puro para mejor legibilidad al imprimir
-
-        // --- 6. POSICIONAR TEXTO DINÁMICO ---
-        // El origen (0,0) está en la esquina inferior izquierda
-
-        // DATOS DE CABECERA (Y ≈ 532 es la línea horizontal)
-        // Paciente
-        page.drawText(nombre, { x: 155, y: 597, size: 14, font: fontRegular, color: colorTexto });
-        // Edad
-        page.drawText(edad, { x: 750, y: 597, size: 14, font: fontRegular, color: colorTexto });
-        // Fecha
-        page.drawText(fecha, { x: 1015, y: 597, size: 14, font: fontRegular, color: colorTexto });
-
-        // TEXTOS MULTI-LÍNEA INFERIORES
-
-        // Prescripción (Lado izquierdo, itálica)
-        page.drawText(prescripcion, {
-            x: 100, // Coordenada X de inicio
-            y: 460, // Coordenada Y de inicio (comienza más abajo que la cabecera)
-            size: 13,
-            font: fontItalic,
-            lineHeight: 18,
-            maxWidth: 420, // Ancho máximo antes de hacer salto de línea automático
-            color: colorTexto
-        });
-
-        // Indicaciones (Lado derecho, regular)
-        page.drawText(indicaciones, {
-            x: 610, // Coordenada X de inicio
-            y: 460, // Coordenada Y de inicio
-            size: 11,
-            font: fontRegular,
-            lineHeight: 15,
-            maxWidth: 420, // Ancho máximo
-            color: colorTexto
-        });
-
-        // 7. Generar y descargar el archivo de forma compatible
-        const pdfBytes = await pdfDoc.save();
-        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-        
-        // Crear nombre de archivo basado en el paciente
-        const fileName = `Receta_${nombre.replace(/\s+/g, '_') || 'Paciente'}.pdf`;
-        
-        // Método de descarga compatible con PC y Móvil
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a); // Necesario para Firefox móvil
-        a.click();
-        
-        // Limpieza
-        setTimeout(() => {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }, 100);
-
-    } catch (err) {
-        console.error("Error al generar el PDF:", err);
-        alert("Ocurrió un error al generar el PDF: " + err.message);
-    } finally {
-        btn.innerText = originalText;
-        btn.disabled = false;
-    }
-}
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('Registro de SW exitoso', reg))
+                .catch(err => console.warn('Error al registrar SW', err));
+        }
     </script>
 </body>
 
