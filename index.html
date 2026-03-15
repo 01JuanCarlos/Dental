@@ -131,11 +131,14 @@
                         <button id="downloadLink" class="btn-modal btn-download">
                             ⬇️ Descargar PDF
                         </button>
-                        <a id="whatsappLink" href="#" target="_blank" class="btn-modal btn-whatsapp">
+
+                        <button onclick="compartirPorWhatsApp()" class="btn-modal btn-whatsapp">
                             💬 Enviar por WhatsApp
-                        </a>
+                        </button>
+
                         <button class="btn-close" onclick="cerrarModal()">Cerrar</button>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -198,28 +201,22 @@
     <script>
         // --- LÓGICA DE GENERACIÓN Y MANEJO DE ARCHIVO ---
 
-        let pdfBlobUrl = null; // Variable global para almacenar la URL del PDF generado
-        let nombreArchivo = ""; // Nombre dinámico del archivo
+        let pdfBlobUrl = null;
+        let nombreArchivo = "";
 
         async function procesarReceta() {
-            // 1. Inicialización de PDF-LIB
             const { PDFDocument, rgb, StandardFonts } = PDFLib;
-
-            // 2. Referencias a la interfaz
             const btn = document.querySelector('#btn-generate');
             const originalContent = btn.innerHTML;
 
-            // 3. Activar estado de carga (Preload animado)
             btn.disabled = true;
             btn.innerHTML = `<span class="spinner"></span> GENERANDO...`;
 
             try {
-                // 4. Crear el documento PDF
                 const pdfDoc = await PDFDocument.create();
 
-                // 5. Cargar la plantilla (imagen de fondo)
                 const response = await fetch('plantilla.png');
-                if (!response.ok) throw new Error("No se pudo cargar 'plantilla.png'. Verifica que el archivo exista.");
+                if (!response.ok) throw new Error("No se pudo cargar 'plantilla.png'.");
                 const imageBytes = await response.arrayBuffer();
 
                 let fondoImg;
@@ -229,18 +226,13 @@
                     fondoImg = await pdfDoc.embedJpg(imageBytes);
                 }
 
-                // 6. Configurar la página (A4 Horizontal)
                 const page = pdfDoc.addPage([1122, 794]);
                 const { width, height } = page.getSize();
-
-                // Dibujar fondo
                 page.drawImage(fondoImg, { x: 0, y: 0, width: width, height: height });
 
-                // 7. Configurar fuentes
                 const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
                 const fontItalic = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
 
-                // 8. Obtener datos de los inputs
                 const nombre = document.getElementById('inPaciente').value.toUpperCase() || 'PACIENTE';
                 const edad = document.getElementById('inEdad').value || '';
                 const fecha = document.getElementById('inFecha').value || '';
@@ -249,13 +241,11 @@
 
                 const colorTexto = rgb(0, 0, 0);
 
-                // 9. Escribir datos en el PDF (Coordenadas ajustadas)
-                // Cabecera
+                // Dibujar Textos
                 page.drawText(nombre, { x: 155, y: 597, size: 14, font: fontRegular, color: colorTexto });
                 page.drawText(edad, { x: 750, y: 597, size: 14, font: fontRegular, color: colorTexto });
                 page.drawText(fecha, { x: 1015, y: 597, size: 14, font: fontRegular, color: colorTexto });
 
-                // Textos multilínea (Prescripción e Indicaciones)
                 page.drawText(prescripcion, {
                     x: 100, y: 460, size: 13, font: fontItalic,
                     lineHeight: 18, maxWidth: 420, color: colorTexto
@@ -266,24 +256,21 @@
                     lineHeight: 18, maxWidth: 420, color: colorTexto
                 });
 
-                // 10. Finalizar PDF y preparar Blob
                 const pdfBytes = await pdfDoc.save();
                 const blob = new Blob([pdfBytes], { type: 'application/pdf' });
 
-                // Limpiar URL anterior si existe para ahorrar memoria
                 if (pdfBlobUrl) URL.revokeObjectURL(pdfBlobUrl);
 
                 pdfBlobUrl = URL.createObjectURL(blob);
                 nombreArchivo = `Receta_${nombre.replace(/\s+/g, '_')}.pdf`;
 
-                // 11. Mostrar éxito al usuario
+                // IMPORTANTE: Pasamos el nombre para que el modal lo guarde
                 abrirModal(nombre);
 
             } catch (err) {
-                console.error("Error detallado:", err);
-                alert("Ocurrió un error al generar la receta: " + err.message);
+                console.error("Error:", err);
+                alert("Error: " + err.message);
             } finally {
-                // 12. Restaurar botón a su estado original
                 btn.innerHTML = originalContent;
                 btn.disabled = false;
             }
@@ -294,9 +281,10 @@
         function abrirModal(nombrePaciente) {
             const modal = document.getElementById('modalSuccess');
             const btnDown = document.getElementById('downloadLink');
-            const btnWa = document.getElementById('whatsappLink');
 
-            // Acción para el botón de descarga dentro del modal
+            // CORRECCIÓN 1: Guardar el nombre en el dataset para que compartirWhatsApp pueda leerlo
+            modal.dataset.paciente = nombrePaciente;
+
             btnDown.onclick = () => {
                 const a = document.createElement('a');
                 a.href = pdfBlobUrl;
@@ -306,24 +294,52 @@
                 document.body.removeChild(a);
             };
 
-            // Configuración de WhatsApp (Mensaje con nombre del paciente)
-            const textoMensaje = `Hola, ya está lista la receta médica de ${nombrePaciente}.`;
-            btnWa.href = `https://wa.me/?text=${encodeURIComponent(textoMensaje)}`;
-
-            // Mostrar el modal (CSS flex para centrar)
             modal.style.display = 'flex';
+        }
+
+        async function compartirWhatsApp() {
+            // CORRECCIÓN 2: Leer el nombre correctamente del dataset del modal
+            const nombrePaciente = document.getElementById('modalSuccess').dataset.paciente || "Paciente";
+
+            // Intentamos usar la API nativa de compartir (Móviles modernos)
+            if (navigator.share && navigator.canShare) {
+                try {
+                    const response = await fetch(pdfBlobUrl);
+                    const blob = await response.blob();
+                    const file = new File([blob], nombreArchivo, { type: 'application/pdf' });
+
+                    // Verificamos si realmente podemos compartir archivos
+                    if (navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            title: 'Receta Médica',
+                            text: `Hola, adjunto la receta médica de ${nombrePaciente}`,
+                            files: [file]
+                        });
+                    } else {
+                        throw new Error("Compartir archivos no soportado");
+                    }
+                } catch (err) {
+                    // Plan B si falla el compartir archivo
+                    abrirLinkWhatsApp(nombrePaciente);
+                }
+            } else {
+                // Plan B para PC
+                abrirLinkWhatsApp(nombrePaciente);
+            }
+        }
+
+        function abrirLinkWhatsApp(nombre) {
+            const mensaje = encodeURIComponent(`Hola, la receta de ${nombre} está lista. Por favor descárguela.`);
+            window.open(`https://wa.me/?text=${mensaje}`, '_blank');
         }
 
         function cerrarModal() {
             document.getElementById('modalSuccess').style.display = 'none';
         }
 
-        // Cerrar modal si el usuario hace clic fuera del contenido blanco
         window.onclick = function (event) {
             const modal = document.getElementById('modalSuccess');
-            if (event.target == modal) {
-                cerrarModal();
-            }
+            if (event.target == modal) cerrarModal();
         };
     </script>
 </body>
