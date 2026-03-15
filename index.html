@@ -118,22 +118,32 @@
                 </div>
 
 
-                <button id="btn-generate" onclick="procesarReceta()">
+                <button id="btn-generate" onclick="procesarReceta()"
+                    class="w-full bg-[#243e36] text-white py-5 rounded-2xl font-bold hover:bg-[#1a2d27] transition-all shadow-xl hover:shadow-[#243e36]/20 active:scale-95 flex items-center justify-center gap-2 mt-4">
                     GENERAR RECETA
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 26" width="24" height="24" fill="#FFF"
+                        fill-rule="evenodd">
+                        <path
+                            d="M13 26C5.82 26 0 20.18 0 13S5.82 0 13 0s13 5.82 13 13-5.82 13-13 13zm0-2c6.075 0 11-4.925 11-11S19.075 2 13 2 2 6.925 2 13s4.925 11 11 11z"
+                            fill-rule="nonzero"></path>
+                        <path
+                            d="M18.684 13.105a.55.55 0 0 1-.148.378l-5.263 5.263a.55.55 0 0 1-.378.148.54.54 0 0 1-.526-.526V15.21H7.842a.54.54 0 0 1-.526-.526v-3.158A.54.54 0 0 1 7.842 11h4.526V7.842a.52.52 0 0 1 .526-.526c.148 0 .28.066.395.164l5.247 5.247a.55.55 0 0 1 .148.378z">
+                        </path>
+                    </svg>
                 </button>
             </div>
             <div id="modalSuccess" class="modal-overlay">
-                <div class="modal-content">
-                    <h3>¡Receta Lista! 🎉</h3>
-                    <p>¿Qué deseas hacer con el documento?</p>
+                <div class="modal-content" style="display: flex;align-items: center;justify-content: center;flex-direction: column;">
+                    <img src="icon-succes.png" alt="">
+                    <h3 class="text-2xl font-bold text-[#243e36] flex items-center gap-3">¡Receta Lista!</h3>
 
-                    <div class="modal-buttons">
+                    <div class="modal-buttons" style=" width: 100%;">
                         <button id="downloadLink" class="btn-modal btn-download">
-                            ⬇️ Descargar PDF
+                            <i data-lucide="download-cloud" class="w-5 h-5"></i> Descargar PDF
                         </button>
 
                         <button onclick="compartirWhatsApp()" class="btn-modal btn-whatsapp">
-                            💬 Enviar por WhatsApp
+                            <i data-lucide="share-2" class="w-5 h-5"></i>Compartir
                         </button>
 
                         <button class="btn-close" onclick="cerrarModal()">Cerrar</button>
