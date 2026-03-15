@@ -5,134 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recetario Alta Gracia - Pro</title>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <link rel="manifest" href="/manifest.json">
     <script src="https://unpkg.com/lucide@latest"></script>
-
-
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-
     <meta name="theme-color" content="#000000">
-    <style>
-        /* Ajustar altura y bordes para que coincida con Tailwind rounded-xl */
-        .select2-container .select2-selection--single {
-            height: 46px !important;
-            border: 1px solid #e5e7eb !important;
-            /* border-gray-200 */
-            border-radius: 0.75rem !important;
-            /* rounded-xl */
-        }
-
-        /* Centrar el texto verticalmente */
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            line-height: 46px !important;
-            padding-left: 12px !important;
-            font-size: 0.875rem !important;
-            /* text-sm */
-            font-weight: 600;
-        }
-
-        /* Personalizar el color de la opción seleccionada */
-        .select2-container--default .select2-results__option--highlighted[aria-selected] {
-            background-color: #243e36 !important;
-        }
-
-        /* Ajustar la flecha */
-        .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 46px !important;
-        }
-    </style>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Montserrat:wght@400;700&display=swap');
-
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: #d1d5db;
-        }
-
-        .font-alta {
-            font-family: 'Cinzel', serif;
-        }
-
-        .receta-container {
-            width: 100%;
-            max-width: 1122px;
-            aspect-ratio: 1122 / 794;
-            background: white;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-            margin: auto;
-        }
-
-        #panelControl {
-            min-height: 865px;
-        }
-
-        #receta {
-            width: 1122px;
-            height: 794px;
-            position: absolute;
-            top: 0;
-            left: 0;
-            transform-origin: top left;
-            background: white;
-        }
-
-        .header-container {
-            position: relative;
-            height: 180px;
-            width: 90%;
-            left: 112px;
-            background-color: #243e36 !important;
-            mask-image: radial-gradient(circle at 0px 90px, transparent 110px, black 111px);
-            -webkit-mask-image: radial-gradient(circle at 0px 90px, transparent 110px, black 111px);
-        }
-
-        .logo-circle {
-            position: absolute;
-            left: 3px;
-            top: 25px;
-            height: 130px;
-
-            background: white;
-            z-index: 20;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-        }
-
-        .divider {
-            position: absolute;
-            left: 50%;
-            top: 220px;
-            bottom: 80px;
-            width: 2px;
-            background-color: #c2a37d;
-            opacity: 0.3;
-        }
-
-        .footer-alta {
-            background-color: #243e36 !important;
-            height: 55px;
-            width: 100%;
-            position: absolute;
-            bottom: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-    </style>
 </head>
 
 <body class="p-2 md:p-10">
     <div class="max-w-[1600px] mx-auto flex flex-col lg:flex-row gap-6">
-
         <div id="panelControl"
             class="w-full lg:w-1/4 bg-slate-50 p-8 rounded-3xl shadow-2xl border-t-[10px] border-[#243e36] h-fit">
             <header class="mb-8">
@@ -232,16 +117,28 @@
                         class="w-full p-4 bg-white border border-gray-200 rounded-xl outline-none text-[12px] transition-all focus:border-[#243e36] focus:ring-4 focus:ring-[#243e36]/10 resize-none"></textarea>
                 </div>
 
-                <button onclick="descargarPDF()"
-                    class="w-full bg-[#243e36] text-white py-5 rounded-2xl font-bold hover:bg-[#1a2d27] transition-all shadow-xl hover:shadow-[#243e36]/20 active:scale-95 flex items-center justify-center gap-2 mt-4">
-                    <i data-lucide="download-cloud" class="w-5 h-5"></i>
-                    GENERAR DOCUMENTO PDF
+
+                <button id="btn-generate" onclick="procesarReceta()">
+                    GENERAR RECETA
                 </button>
             </div>
+            <div id="modalSuccess" class="modal-overlay">
+                <div class="modal-content">
+                    <h3>¡Receta Lista! 🎉</h3>
+                    <p>¿Qué deseas hacer con el documento?</p>
+
+                    <div class="modal-buttons">
+                        <button id="downloadLink" class="btn-modal btn-download">
+                            ⬇️ Descargar PDF
+                        </button>
+                        <a id="whatsappLink" href="#" target="_blank" class="btn-modal btn-whatsapp">
+                            💬 Enviar por WhatsApp
+                        </a>
+                        <button class="btn-close" onclick="cerrarModal()">Cerrar</button>
+                    </div>
+                </div>
+            </div>
         </div>
-
-
-
         <div class="w-full lg:w-3/4 flex justify-center items-start">
             <div id="recetaContainer" class="receta-container">
                 <div id="receta">
@@ -297,232 +194,137 @@
             </div>
         </div>
     </div>
-
-
+    <script src="main.js"></script>
     <script>
-        $(document).ready(function () {
-            // Inicializar Selects
-            $('#selTipoPaciente').select2({
-                minimumResultsForSearch: Infinity,
-                width: '100%'
-            });
+        // --- LÓGICA DE GENERACIÓN Y MANEJO DE ARCHIVO ---
 
-            $('#selProc').select2({
-                placeholder: "Seleccionar procedimiento...",
-                allowClear: true,
-                width: '100%'
-            });
+        let pdfBlobUrl = null; // Variable global para almacenar la URL del PDF generado
+        let nombreArchivo = ""; // Nombre dinámico del archivo
 
-            // --- RE-CONECTAR LA REACTIVIDAD ---
-
-            // Escuchar cambio en Tipo de Paciente (vía Select2)
-            $('#selTipoPaciente').on('change', function () {
-                const value = $(this).val();
-                const divRango = document.getElementById('divRangoNino');
-
-                if (value === 'nino') {
-                    divRango.classList.remove('hidden');
-                } else {
-                    divRango.classList.add('hidden');
-                }
-                actualizarContenido();
-            });
-
-            // Escuchar cambio en Procedimiento (vía Select2)
-            $('#selProc').on('change', function () {
-                actualizarContenido();
-            });
-
-            // Escuchar cambio en Rango Niño
-            $('#selRangoNino').on('change', function () {
-                actualizarContenido();
-            });
-        });
-    </script>
-    <script>
-        // Inicializar iconos de Lucide
-        lucide.createIcons();
-    </script>
-    <script>
-        // --- LÓGICA DE INTERFAZ ---
-        function ajustarEscala() {
-            const container = document.getElementById('recetaContainer');
-            const content = document.getElementById('receta');
-            const escala = container.offsetWidth / 1122;
-            content.style.transform = `scale(${escala})`;
-        }
-        window.addEventListener('resize', ajustarEscala);
-
-        window.onload = function () {
-            ajustarEscala();
-            const hoy = new Date();
-            const fechaFormateada = hoy.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
-            document.getElementById('inFecha').value = fechaFormateada;
-            document.getElementById('pvFecha').innerText = fechaFormateada;
-        };
-
-        const recetasData = {
-            "periodoncia": { p: "", i: "Realizar enjuagues con 5 ml de VITIS sin diluir, durante 30 segundos, como mínimo 2 veces al día después de cada cepillado.\n\nPara una mayor eficacia es recomendable no mezclar con agua y evitar comer o beber inmediatamente después de su uso." },
-            "alveolitis": { p: "-Amoxicilina 500 mg más acido clavulánico 125 mg x 5 días.\n15 tabletas cada 8 horas \n\n- Etoricoxib 120 mg  una vez al día x 3 días.\n- Después de cada comida.", i: "" },
-            "extraccion_adulto": { p: "- Amoxicilina 500 mg x 5 días # 15 tabletas cada 8 horas \n\n- Dolocordralan extraforte x 2 días # 6 tabletas cada 8 horas.\n\n Después de cada comida ", i: "Evitar:\n- Fumar\n- Escupir las primeras 24 hrs.\n- Actividad física por 3 días.\n- Sol y comidas picantes.\n\nDieta:\n- Helado.\n- Verduras al vapor.\n- Dieta blanda." },
-            "extraccion_nino_5-6": { p: "- Jarabe Amoxicilina 250 mg x 5 días: 7 ml cada 8 horas.\n\n- Jarabe Ibuprofeno 100 mg x 2 días: 7 ml cada 8 horas.\n\n Las dos juntas después de cada comida.", i: "" },
-            "extraccion_nino_2": { p: "- Amoxicilina 250 mg x 5 días: 5 ml cada 8 horas.\n- Ibuprofeno 100 mg x 2 días: 5 ml cada 8 horas.\n\n Las dos juntas después de cada comida.", i: "" }
-        };
-
-        document.getElementById('selTipoPaciente').addEventListener('change', function () {
-            const divRango = document.getElementById('divRangoNino');
-            this.value === 'nino' ? divRango.classList.remove('hidden') : divRango.classList.add('hidden');
-            actualizarContenido();
-        });
-
-        document.getElementById('selRangoNino').addEventListener('change', actualizarContenido);
-        document.getElementById('selProc').addEventListener('change', actualizarContenido);
-
-        function actualizarContenido() {
-            const proc = document.getElementById('selProc').value;
-            const tipo = document.getElementById('selTipoPaciente').value;
-            const rango = document.getElementById('selRangoNino').value;
-            let clave = proc === 'extraccion' ? (tipo === 'adulto' ? 'extraccion_adulto' : `extraccion_nino_${rango}`) : proc;
-            if (recetasData[clave]) {
-                document.getElementById('inPres').value = recetasData[clave].p;
-                document.getElementById('inInd').value = recetasData[clave].i;
-                document.getElementById('pvPres').innerText = recetasData[clave].p;
-                document.getElementById('pvInd').innerText = recetasData[clave].i;
-            }
-        }
-
-        ['inPaciente', 'inEdad', 'inPres', 'inInd'].forEach(id => {
-            document.getElementById(id).addEventListener('input', (e) => {
-                document.getElementById(id.replace('in', 'pv')).innerText = e.target.value;
-            });
-        });
-
-        // --- NUEVA LÓGICA DE PDF-LIB ---
-        async function descargarPDF() {
+        async function procesarReceta() {
+            // 1. Inicialización de PDF-LIB
             const { PDFDocument, rgb, StandardFonts } = PDFLib;
-            const btn = document.querySelector('button');
-            const originalText = btn.innerText;
 
-            btn.innerText = "GENERANDO...";
+            // 2. Referencias a la interfaz
+            const btn = document.querySelector('#btn-generate');
+            const originalContent = btn.innerHTML;
+
+            // 3. Activar estado de carga (Preload animado)
             btn.disabled = true;
+            btn.innerHTML = `<span class="spinner"></span> GENERANDO...`;
 
             try {
-                // 1. Crear documento
+                // 4. Crear el documento PDF
                 const pdfDoc = await PDFDocument.create();
 
-                // 2. Cargar la imagen de fondo (plantilla)
-                // Nota: Asegúrate de que 'plantilla.png' esté en la misma carpeta que el HTML
+                // 5. Cargar la plantilla (imagen de fondo)
                 const response = await fetch('plantilla.png');
-                if (!response.ok) throw new Error("No se pudo cargar la imagen de la plantilla");
+                if (!response.ok) throw new Error("No se pudo cargar 'plantilla.png'. Verifica que el archivo exista.");
                 const imageBytes = await response.arrayBuffer();
 
                 let fondoImg;
                 try {
                     fondoImg = await pdfDoc.embedPng(imageBytes);
                 } catch (e) {
-                    // Intenta cargar como JPG si falla como PNG
                     fondoImg = await pdfDoc.embedJpg(imageBytes);
                 }
 
-                // 3. Añadir página (A4 Horizontal en px: 1122x794)
+                // 6. Configurar la página (A4 Horizontal)
                 const page = pdfDoc.addPage([1122, 794]);
                 const { width, height } = page.getSize();
 
-                // Dibujar el fondo cubriendo toda la página
-                page.drawImage(fondoImg, {
-                    x: 0,
-                    y: 0,
-                    width: width,
-                    height: height,
-                });
+                // Dibujar fondo
+                page.drawImage(fondoImg, { x: 0, y: 0, width: width, height: height });
 
-                // 4. Configurar fuentes estándar de pdf-lib
+                // 7. Configurar fuentes
                 const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
-                const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
                 const fontItalic = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
 
-                // 5. Capturar datos dinámicos de los inputs
-                const nombre = document.getElementById('inPaciente').value.toUpperCase() || '';
+                // 8. Obtener datos de los inputs
+                const nombre = document.getElementById('inPaciente').value.toUpperCase() || 'PACIENTE';
                 const edad = document.getElementById('inEdad').value || '';
-                // La fecha ya viene pre-formateada en 'inFecha'
-                const fecha = document.getElementById('inFecha').value;
-                const prescripcion = document.getElementById('inPres').value;
-                const indicaciones = document.getElementById('inInd').value;
+                const fecha = document.getElementById('inFecha').value || '';
+                const prescripcion = document.getElementById('inPres').value || '';
+                const indicaciones = document.getElementById('inInd').value || '';
 
-                const colorTexto = rgb(0, 0, 0); // Negro puro para mejor legibilidad al imprimir
+                const colorTexto = rgb(0, 0, 0);
 
-                // --- 6. POSICIONAR TEXTO DINÁMICO ---
-                // El origen (0,0) está en la esquina inferior izquierda
-
-                // DATOS DE CABECERA (Y ≈ 532 es la línea horizontal)
-                // Paciente
+                // 9. Escribir datos en el PDF (Coordenadas ajustadas)
+                // Cabecera
                 page.drawText(nombre, { x: 155, y: 597, size: 14, font: fontRegular, color: colorTexto });
-                // Edad
                 page.drawText(edad, { x: 750, y: 597, size: 14, font: fontRegular, color: colorTexto });
-                // Fecha
                 page.drawText(fecha, { x: 1015, y: 597, size: 14, font: fontRegular, color: colorTexto });
 
-                // TEXTOS MULTI-LÍNEA INFERIORES
-
-                // Prescripción (Lado izquierdo, itálica)
+                // Textos multilínea (Prescripción e Indicaciones)
                 page.drawText(prescripcion, {
-                    x: 100, // Coordenada X de inicio
-                    y: 460, // Coordenada Y de inicio (comienza más abajo que la cabecera)
-                    size: 13,
-                    font: fontItalic,
-                    lineHeight: 18,
-                    maxWidth: 420, // Ancho máximo antes de hacer salto de línea automático
-                    color: colorTexto
+                    x: 100, y: 460, size: 13, font: fontItalic,
+                    lineHeight: 18, maxWidth: 420, color: colorTexto
                 });
 
-                // Indicaciones (Lado derecho, regular)
                 page.drawText(indicaciones, {
-                    x: 610, // Coordenada X de inicio
-                    y: 460, // Coordenada Y de inicio
-                    size: 13,
-                    font: fontItalic,
-                    lineHeight: 18,
-                    maxWidth: 420, // Ancho máximo
-                    color: colorTexto
+                    x: 610, y: 460, size: 13, font: fontItalic,
+                    lineHeight: 18, maxWidth: 420, color: colorTexto
                 });
 
-                // 7. Generar y descargar el archivo de forma compatible
+                // 10. Finalizar PDF y preparar Blob
                 const pdfBytes = await pdfDoc.save();
                 const blob = new Blob([pdfBytes], { type: 'application/pdf' });
 
-                // Crear nombre de archivo basado en el paciente
-                const fileName = `Receta_${nombre.replace(/\s+/g, '_') || 'Paciente'}.pdf`;
+                // Limpiar URL anterior si existe para ahorrar memoria
+                if (pdfBlobUrl) URL.revokeObjectURL(pdfBlobUrl);
 
-                // Método de descarga compatible con PC y Móvil
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = fileName;
-                document.body.appendChild(a); // Necesario para Firefox móvil
-                a.click();
+                pdfBlobUrl = URL.createObjectURL(blob);
+                nombreArchivo = `Receta_${nombre.replace(/\s+/g, '_')}.pdf`;
 
-                // Limpieza
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
-                }, 100);
+                // 11. Mostrar éxito al usuario
+                abrirModal(nombre);
 
             } catch (err) {
-                console.error("Error al generar el PDF:", err);
-                alert("Ocurrió un error al generar el PDF: " + err.message);
+                console.error("Error detallado:", err);
+                alert("Ocurrió un error al generar la receta: " + err.message);
             } finally {
-                btn.innerText = originalText;
+                // 12. Restaurar botón a su estado original
+                btn.innerHTML = originalContent;
                 btn.disabled = false;
             }
         }
-    </script>
 
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('Registro de SW exitoso', reg))
-                .catch(err => console.warn('Error al registrar SW', err));
+        // --- FUNCIONES DEL MODAL ---
+
+        function abrirModal(nombrePaciente) {
+            const modal = document.getElementById('modalSuccess');
+            const btnDown = document.getElementById('downloadLink');
+            const btnWa = document.getElementById('whatsappLink');
+
+            // Acción para el botón de descarga dentro del modal
+            btnDown.onclick = () => {
+                const a = document.createElement('a');
+                a.href = pdfBlobUrl;
+                a.download = nombreArchivo;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+
+            // Configuración de WhatsApp (Mensaje con nombre del paciente)
+            const textoMensaje = `Hola, ya está lista la receta médica de ${nombrePaciente}.`;
+            btnWa.href = `https://wa.me/?text=${encodeURIComponent(textoMensaje)}`;
+
+            // Mostrar el modal (CSS flex para centrar)
+            modal.style.display = 'flex';
         }
+
+        function cerrarModal() {
+            document.getElementById('modalSuccess').style.display = 'none';
+        }
+
+        // Cerrar modal si el usuario hace clic fuera del contenido blanco
+        window.onclick = function (event) {
+            const modal = document.getElementById('modalSuccess');
+            if (event.target == modal) {
+                cerrarModal();
+            }
+        };
     </script>
 </body>
 
