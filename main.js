@@ -47,13 +47,33 @@ $(document).ready(function () {
 
     window.addEventListener('resize', ajustarEscala);
 
-    window.onload = function () {
+    document.addEventListener('DOMContentLoaded', function () {
         ajustarEscala();
+
         const hoy = new Date();
-        const fechaFormateada = hoy.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        document.getElementById('inFecha').value = fechaFormateada;
-        document.getElementById('pvFecha').innerText = fechaFormateada;
-    };
+
+        // 1. Formato para el texto visual (Span/Div): dd/mm/yyyy
+        const dia = String(hoy.getDate()).padStart(2, '0');
+        const mes = String(hoy.getMonth() + 1).padStart(2, '0'); // Enero es 0
+        const anio = hoy.getFullYear();
+        const fechaVisual = `${dia}/${mes}/${anio}`;
+
+        // 2. Formato para el Input HTML5: yyyy-mm-dd
+        const fechaInput = `${anio}-${mes}-${dia}`;
+
+        // Asignación con comprobación de existencia
+        const inputFecha = document.getElementById('inFecha');
+        const previewFecha = document.getElementById('pvFecha');
+
+        if (inputFecha) {
+            // Si el input es type="date", usa fechaInput. Si es type="text", usa fechaVisual.
+            inputFecha.value = inputFecha.type === 'date' ? fechaInput : fechaVisual;
+        }
+
+        if (previewFecha) {
+            previewFecha.innerText = fechaVisual;
+        }
+    });
 
     const recetasData = {
         "periodoncia": { p: "", i: "Realizar enjuagues con 5 ml de VITIS sin diluir, durante 30 segundos, como mínimo 2 veces al día después de cada cepillado.\n\nPara una mayor eficacia es recomendable no mezclar con agua y evitar comer o beber inmediatamente después de su uso." },
@@ -91,7 +111,7 @@ $(document).ready(function () {
         });
     });
 
-   
+
 
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js')
