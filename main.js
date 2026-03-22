@@ -46,44 +46,14 @@ $(document).ready(function () {
     }
 
     window.addEventListener('resize', ajustarEscala);
-    
-    function ponerFechaActual() {
-        // 1. Obtener fecha (Manual para evitar bugs de localización en Safari)
-        const ahora = new Date();
-        const dia = String(ahora.getDate()).padStart(2, '0');
-        const mes = String(ahora.getMonth() + 1).padStart(2, '0');
-        const anio = ahora.getFullYear();
-        const fechaFinal = `${dia}/${mes}/${anio}`;
 
-        const inputFecha = document.getElementById('inFecha');
-        const previewFecha = document.getElementById('pvFecha');
-
-        if (inputFecha) {
-            // Rompemos el cache de Safari/iOS
-            inputFecha.value = "";
-            inputFecha.defaultValue = fechaFinal;
-            inputFecha.value = fechaFinal;
-            // Forzamos el atributo visual en el HTML
-            inputFecha.setAttribute('value', fechaFinal);
-        }
-
-        if (previewFecha) {
-            previewFecha.innerText = fechaFinal;
-        }
-
-        // 2. Ejecutar escala después de asignar la fecha
-        if (typeof ajustarEscala === 'function') {
-            ajustarEscala();
-        }
-    }
-
-    // Eventos de ejecución
-    document.addEventListener('DOMContentLoaded', ponerFechaActual);
-
-    // Este es el más importante para que no falle al recargar en móviles
-    window.addEventListener('pageshow', function (event) {
-        ponerFechaActual();
-    });
+    window.onload = function () {
+        ajustarEscala();
+        const hoy = new Date();
+        const fechaFormateada = hoy.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        document.getElementById('inFecha').value = fechaFormateada;
+        document.getElementById('pvFecha').innerText = fechaFormateada;
+    };
 
     const recetasData = {
         "periodoncia": { p: "", i: "Realizar enjuagues con 5 ml de VITIS sin diluir, durante 30 segundos, como mínimo 2 veces al día después de cada cepillado.\n\nPara una mayor eficacia es recomendable no mezclar con agua y evitar comer o beber inmediatamente después de su uso." },
@@ -121,7 +91,7 @@ $(document).ready(function () {
         });
     });
 
-
+   
 
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js')
