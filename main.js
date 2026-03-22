@@ -47,13 +47,12 @@ $(document).ready(function () {
 
     window.addEventListener('resize', ajustarEscala);
 
-    window.onload = function () {
-        ajustarEscala();
-        const hoy = new Date();
-        const fechaFormateada = hoy.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        document.getElementById('inFecha').value = fechaFormateada;
-        document.getElementById('pvFecha').innerText = fechaFormateada;
-    };
+    // Inicializar escala y fecha
+    ajustarEscala();
+    const hoy = new Date();
+    const fechaFormateada = hoy.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    document.getElementById('inFecha').value = fechaFormateada;
+    document.getElementById('pvFecha').innerText = fechaFormateada;
 
     const recetasData = {
         "periodoncia": { p: "", i: "Realizar enjuagues con 5 ml de VITIS sin diluir, durante 30 segundos, como mínimo 2 veces al día después de cada cepillado.\n\nPara una mayor eficacia es recomendable no mezclar con agua y evitar comer o beber inmediatamente después de su uso." },
