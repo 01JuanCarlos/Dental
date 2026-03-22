@@ -133,7 +133,8 @@
                 </button>
             </div>
             <div id="modalSuccess" class="modal-overlay">
-                <div class="modal-content" style="display: flex;align-items: center;justify-content: center;flex-direction: column;">
+                <div class="modal-content"
+                    style="display: flex;align-items: center;justify-content: center;flex-direction: column;">
                     <img src="icon-succes.png" alt="">
                     <h3 class="text-2xl font-bold text-[#243e36] flex items-center gap-3">¡Receta Lista!</h3>
 
@@ -305,6 +306,7 @@
             };
 
             modal.style.display = 'flex';
+
         }
 
         async function compartirWhatsApp() {
@@ -345,6 +347,24 @@
 
         function cerrarModal() {
             document.getElementById('modalSuccess').style.display = 'none';
+            limpiarFormulario();
+        }
+
+        function limpiarFormulario() {
+            // 1. Limpiar campos de texto y número
+            document.getElementById('inPaciente').value = '';
+            document.getElementById('inEdad').value = '';
+            document.getElementById('inPres').value = '';
+            document.getElementById('inInd').value = '';
+
+            // 2. Resetear Selects a su primera opción
+            document.getElementById('selTipoPaciente').value = 'adulto';
+            document.getElementById('selProc').value = '';
+
+            // 3. Manejar el div condicional de niños
+            const divRangoNino = document.getElementById('divRangoNino');
+            divRangoNino.classList.add('hidden'); // Ocultarlo de nuevo
+            document.getElementById('selRangoNino').selectedIndex = 0;
         }
 
         window.onclick = function (event) {
