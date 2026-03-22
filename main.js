@@ -46,34 +46,33 @@ $(document).ready(function () {
     }
 
     window.addEventListener('resize', ajustarEscala);
-
-    document.addEventListener('DOMContentLoaded', function () {
+window.addEventListener('load', function() {
+    // 1. Ejecutar tu función de escala
+    if (typeof ajustarEscala === 'function') {
         ajustarEscala();
+    }
 
-        const hoy = new Date();
+    // 2. Obtener fecha actual manualmente (Formato dd/mm/yyyy)
+    const ahora = new Date();
+    const dia = String(ahora.getDate()).padStart(2, '0');
+    const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+    const anio = ahora.getFullYear();
+    const fechaFinal = `${dia}/${mes}/${anio}`;
 
-        // 1. Formato para el texto visual (Span/Div): dd/mm/yyyy
-        const dia = String(hoy.getDate()).padStart(2, '0');
-        const mes = String(hoy.getMonth() + 1).padStart(2, '0'); // Enero es 0
-        const anio = hoy.getFullYear();
-        const fechaVisual = `${dia}/${mes}/${anio}`;
+    // 3. Referencias a los elementos
+    const inputFecha = document.getElementById('inFecha');
+    const previewFecha = document.getElementById('pvFecha');
 
-        // 2. Formato para el Input HTML5: yyyy-mm-dd
-        const fechaInput = `${anio}-${mes}-${dia}`;
+    // 4. Asignación forzada
+    if (inputFecha) {
+        inputFecha.setAttribute('value', fechaFinal); // Forzamos el atributo
+        inputFecha.value = fechaFinal;               // Forzamos la propiedad
+    }
 
-        // Asignación con comprobación de existencia
-        const inputFecha = document.getElementById('inFecha');
-        const previewFecha = document.getElementById('pvFecha');
-
-        if (inputFecha) {
-            // Si el input es type="date", usa fechaInput. Si es type="text", usa fechaVisual.
-            inputFecha.value = inputFecha.type === 'date' ? fechaInput : fechaVisual;
-        }
-
-        if (previewFecha) {
-            previewFecha.innerText = fechaVisual;
-        }
-    });
+    if (previewFecha) {
+        previewFecha.innerText = fechaFinal;
+    }
+});
 
     const recetasData = {
         "periodoncia": { p: "", i: "Realizar enjuagues con 5 ml de VITIS sin diluir, durante 30 segundos, como mínimo 2 veces al día después de cada cepillado.\n\nPara una mayor eficacia es recomendable no mezclar con agua y evitar comer o beber inmediatamente después de su uso." },
@@ -111,7 +110,7 @@ $(document).ready(function () {
         });
     });
 
-
+   
 
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js')
