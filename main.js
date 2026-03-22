@@ -46,33 +46,44 @@ $(document).ready(function () {
     }
 
     window.addEventListener('resize', ajustarEscala);
-window.addEventListener('load', function() {
-    // 1. Ejecutar tu función de escala
-    if (typeof ajustarEscala === 'function') {
-        ajustarEscala();
+    
+    function ponerFechaActual() {
+        // 1. Obtener fecha (Manual para evitar bugs de localización en Safari)
+        const ahora = new Date();
+        const dia = String(ahora.getDate()).padStart(2, '0');
+        const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+        const anio = ahora.getFullYear();
+        const fechaFinal = `${dia}/${mes}/${anio}`;
+
+        const inputFecha = document.getElementById('inFecha');
+        const previewFecha = document.getElementById('pvFecha');
+
+        if (inputFecha) {
+            // Rompemos el cache de Safari/iOS
+            inputFecha.value = "";
+            inputFecha.defaultValue = fechaFinal;
+            inputFecha.value = fechaFinal;
+            // Forzamos el atributo visual en el HTML
+            inputFecha.setAttribute('value', fechaFinal);
+        }
+
+        if (previewFecha) {
+            previewFecha.innerText = fechaFinal;
+        }
+
+        // 2. Ejecutar escala después de asignar la fecha
+        if (typeof ajustarEscala === 'function') {
+            ajustarEscala();
+        }
     }
 
-    // 2. Obtener fecha actual manualmente (Formato dd/mm/yyyy)
-    const ahora = new Date();
-    const dia = String(ahora.getDate()).padStart(2, '0');
-    const mes = String(ahora.getMonth() + 1).padStart(2, '0');
-    const anio = ahora.getFullYear();
-    const fechaFinal = `${dia}/${mes}/${anio}`;
+    // Eventos de ejecución
+    document.addEventListener('DOMContentLoaded', ponerFechaActual);
 
-    // 3. Referencias a los elementos
-    const inputFecha = document.getElementById('inFecha');
-    const previewFecha = document.getElementById('pvFecha');
-
-    // 4. Asignación forzada
-    if (inputFecha) {
-        inputFecha.setAttribute('value', fechaFinal); // Forzamos el atributo
-        inputFecha.value = fechaFinal;               // Forzamos la propiedad
-    }
-
-    if (previewFecha) {
-        previewFecha.innerText = fechaFinal;
-    }
-});
+    // Este es el más importante para que no falle al recargar en móviles
+    window.addEventListener('pageshow', function (event) {
+        ponerFechaActual();
+    });
 
     const recetasData = {
         "periodoncia": { p: "", i: "Realizar enjuagues con 5 ml de VITIS sin diluir, durante 30 segundos, como mínimo 2 veces al día después de cada cepillado.\n\nPara una mayor eficacia es recomendable no mezclar con agua y evitar comer o beber inmediatamente después de su uso." },
@@ -110,7 +121,7 @@ window.addEventListener('load', function() {
         });
     });
 
-   
+
 
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js')
